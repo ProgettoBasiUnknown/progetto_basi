@@ -68,7 +68,7 @@ def registerer()
 	c=request.form['cognome']
 	m=request.form['email']
 	p=request.form['password']
-	t=request.form['telefono']#########################
+	t=request.form['telefono']
 	
 @app.route('/gestione')
 @login_required
