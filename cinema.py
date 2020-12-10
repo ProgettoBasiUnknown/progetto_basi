@@ -32,7 +32,7 @@ class User( UserMixin ):
 def load_user(user_id):
 		utente=richiesta_utente(user_id)
 		risposta = User(utente)
-	return risposta#######################
+	return risposta
 
 @app.route('/')
 def home():
