@@ -32,7 +32,7 @@ class User( UserMixin ):
 def load_user(user_id):
 		utente=richiesta_utente(user_id)
 		risposta = User(utente)
-	return risposta
+	return risposta#######################
 
 @app.route('/')
 def home():
@@ -68,7 +68,7 @@ def registerer()
 	c=request.form['cognome']
 	m=request.form['email']
 	p=request.form['password']
-	t=request.form['telefono']
+	t=request.form['telefono']#########################
 	
 @app.route('/gestione')
 @login_required
@@ -76,25 +76,73 @@ def gestore():
 	if is_admin(load_user(get_id())) :
 		return render_template('gestione.html')
 	else:
+		return redirect('/accedi')
 			#accesso negato	
 			
 @app.route('/gestisci_film')
 @login_required
+def film_managing():
+	if is_admin(load_user(get_id())) :
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
 
 @app.route('/aggiungi_film')
 @login_required
+def add_film():
+	if is_admin(load_user(get_id())) :
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
 
 @app.route('/rimuovi_film')
 @login_required	
+def remove_film():
+	if is_admin(load_user(get_id())) :
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
+	
 
 @app.route('/autorizzazioni')
 @login_required
+def authorizations():
+	utente=load_user(get_id())
+	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
 
 @app.route('/aggiungi_proiezione')
 @login_required
+def add_projection():
+	if is_admin(load_user(get_id())) :
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
+
+@app.route('/chiudi_proiezione')
+@login_required
+def close_projection():
+	if is_admin(load_user(get_id())) :
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
 
 @app.route('/statistiche')
 @login_required
+def stats():
+	if is_admin(load_user(get_id())) :
+		return 
+	else:
+		return redirect('/accedi')
+			#accesso negato	
 
 
 
