@@ -64,7 +64,11 @@ def register()
 
 @app.route('/registrazione', methods =[ "POST"])
 def registerer()
-	
+	n=request.form['nome']
+	c=request.form['cognome']
+	m=request.form['email']
+	p=request.form['password']
+	t=request.form['telefono']#########################
 	
 @app.route('/gestione')
 @login_required
