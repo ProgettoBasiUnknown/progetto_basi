@@ -1,4 +1,4 @@
-from flask import * #pisello
+from flask import *
 from flask_login import *
 from sqlalchemy import *
 app= Flask(__name__)
