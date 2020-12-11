@@ -150,13 +150,14 @@ def inserimento_film(titolo, durata, pubblicazione, regista, genere):
 
 #azione: inserimento nuovo utente tramite i dati forniti nell'interfaccia web, ID sarò incrementale e gestore di deafault a false
 #richiede: nome(str) cognome(str) email(str) pass(str) telefono(int)
-#controllo se la mail è già presente, se si restituisco true, false atrimenti
 def inserimento_utente(nome, cognome, mail, password, tel):
 	conn=engine.connect()
 	conn.execute(utenti.insert(),
 		[{'nome':nome, 'cognome':cognome, 'email':mail, 'password': password, 'telefono': tel, 'gestore': False}])
+	new_id = conn.execute(select([utenti.c.ID]).where(utenti.c.mail==mail)).first()
 	conn.close()
-
+	return new_id
+	
 #########################################################################################
 
 #azione: inserimento nuova proiezione programmata da parte di un gestore
