@@ -154,9 +154,9 @@ def inserimento_utente(nome, cognome, mail, password, tel):
 	conn=engine.connect()
 	conn.execute(utenti.insert(),
 		[{'nome':nome, 'cognome':cognome, 'email':mail, 'password': password, 'telefono': tel, 'gestore': False}])
-	new_id = conn.execute(select([utenti.c.ID]).where(utenti.c.mail==mail)).first()
+	user = conn.execute(select([utenti]).where(utenti.c.mail==mail)).first()
 	conn.close()
-	return new_id
+	return user
 	
 #########################################################################################
 
