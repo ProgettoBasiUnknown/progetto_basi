@@ -169,11 +169,11 @@ def inserimento_proiezione(orario, salaID, filmID, prezzo):
 
 #########################################################################################
 
-#azione: eliminazione totale di una entry nella tabella film tramite ID, operazione possibili da soli gestori
+#azione: film reso non più disponibile nella lista film ma non eliminato, operazione possibili da soli gestori
 #richiede: ID(int)
-def elimina_film(id): #dafare: inserire un boolean e impostare a false per non rendere più disponibile
+def elimina_film(id): 
 	conn=engine.connect()
-	conn.execute(film.delete().where(film.c.ID==id))
+	conn.execute(film.update().values(availability = false).where(film.c.ID==id))
 	conn.close()
 
 #########################################################################################
@@ -230,7 +230,7 @@ def inserisci_prenotazione(posto, proiezione, cliente):
 #richiede: nada
 def richiesta_tabella_proiezioni():
 	conn = engine.connect()
-	out = conn.execute(text("SELECT * FROM proiezioni")).fetchall()#DA CAMBIARE CON TEXTUAL SQL
+	out = conn.execute(select([proiezioni]).order_by('dataora')).fetchall()
 	conn.close()
 	return out
 
@@ -240,7 +240,7 @@ def richiesta_tabella_proiezioni():
 #richiede: ID(int)
 def richiesta_prenotazioni_utente(id):
 	conn = engine.connect()
-	out = conn.execute(text("SELECT * FROM prenotazioni WHERE cliente =: user_id"), user_id=id).fetchall()	#DA CAMBIARE CON TEXTUAL SQL	
+	out = conn.execute(select([prenotazioni]).where(prenotazioni.c.cliente == id)).fetchall()
 	conn.close()
 	return out
 
@@ -250,7 +250,7 @@ def richiesta_prenotazioni_utente(id):
 #richiede: nada
 def richiesta_tabella_film():
 	conn = engine.connect()
-	out = conn.execute(text("SELECT * FROM film")).fetchall()#DA CAMBIARE CON TEXTUAL SQL
+	out = conn.execute(select([film])).fetchall()
 	conn.close()
 	return out
 
@@ -260,18 +260,27 @@ def richiesta_tabella_film():
 #richiede: nada
 def richiesta_tabella_sale():
 	conn = engine.connect()
-	out = conn.execute(text("SELECT * FROM sale")).fetchall()#DA CAMBIARE CON TEXTUAL SQL
+	out = conn.execute(select([sale])).fetchall()
 	conn.close()
 	return out
 
 #########################################################################################
 
-#azione: vedo se l'utente/mail c'è già. se si ritorno true, altrimenti eseguo inserisci utente
+#azione: verifico se una mail c'è già, se si ritorno true, in caso negativo false
 #richiede:
+def verifica_mail_db(mail):
+	conn = engine.connect()
+	out = conn.execute(select([utenti]).where(utenti.c.email == mail)).first()
+	conn.close()
+	if out==None:
+		return False
+	else:
+		return True
+
 
 #########################################################################################
 
-#azione: verificare se mail e password di un utente corrispondono, true in caso di successo, false altrimenti
+#azione: verificare se mail e password di un utente corrispondono, ritorna -2 se non c'è la mail, -1 in caso di pasw sbagliata, ID dell'utente altrimenti
 #richiede: una mail(str) e pass(str)
 def verifica_credenziali(mail, password):
 	conn = engine.connect()
@@ -281,8 +290,7 @@ def verifica_credenziali(mail, password):
 	if user==None:
 		return -2
 	else:
-		p = user['password']
-		if p==password:
+		if user['password']==password:
 			return user['ID']
 		else:
 			return -1
@@ -316,9 +324,4 @@ def stampa():
 
 start_db()
 stampa()
-
-
-
-
-
 
