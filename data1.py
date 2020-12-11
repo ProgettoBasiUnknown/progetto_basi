@@ -221,7 +221,7 @@ def licenzia(id):
 def inserisci_prenotazione(posto, proiezione, cliente):
 	conn = engine.connect()
 	conn.execute(prenotazioni.insert(),
-		[{'posto': posto, 'proiezione': proiezione, 'cliente': cliente}])
+		[{'posti_prenotati': posto, 'proiezione': proiezione, 'cliente': cliente}])
 	conn.close()
 	#eventuali controlli li metto dopo
 
