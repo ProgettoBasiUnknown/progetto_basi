@@ -39,14 +39,19 @@ def home():		##quante proiezioni mostrare, magari troncando la lista qui o non l
 	if is_authenticated() and is_admin(load_user(get_id())):	
 		return redirect("/gestore")
 	else: 
-		return render_template("home.html")##fatta già una bozza
+		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
+		return render_template("home.html", proiezioni = proiezioni_vicine)##fatta già una bozza
 
 @app.route('/programmazione') ##mostra tutte le proiezioni 
 def programmazione():
+		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni())
 
 @app.route('/accedi')	##pagina per fare il login
 def access()
-	return render_template("accesso.html") ##fatta(scarnissima)
+	if is_authenticated():
+		return render_template("area_personale.html", utente=load_user(get_id()))
+	else:
+		return render_template("accesso.html") ##fatta(scarnissima)
 
 @app.route ("/login", methods =[ "POST"]) ##riceve i dati da /accedi e verifica,
 def logger():				
@@ -61,7 +66,10 @@ def logger():
 
 @app.route('/registrati')	##campi dati da riempire per registrarsi
 def register()
-	return render_template("registrazione.html")
+	if is_authenticated():
+		return render_template("area_personale.html", utente=load_user(get_id()))
+	else:
+		return render_template("registrazione.html")
 
 @app.route('/registrazione', methods =[ "POST"]) ##riceve i dati da /registrati , e li passa ad una funzione che controlla ed eventuamente registra nel db, restituirà un html col risultato dell'operazione
 def registerer()
@@ -70,14 +78,17 @@ def registerer()
 	m=request.form['email']
 	p=request.form['password']
 	t=request.form['telefono']
-	if(-----):
-		risultato = inserimento_utente(n,c,m,p,t)
+	if(verifica_mail_db(m)):
+		risultato = User(inserimento_utente(n,c,m,p,t))
+		login_user(risultato)
+		return render_template("risulato.html", result=True , link="/personale")
+		
 	
 @app.route('/gestione')##home del gestore, dove può scegliere se gestire film/proiezioni, promuovere/declassare utenti/gestori (se è un gestore proprietario) e controllare le statistiche
 @login_required
 def gestore():
 	if is_admin(load_user(get_id())) :
-		return render_template('gestione.html')
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -86,25 +97,25 @@ def gestore():
 @login_required
 def film_managing():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
 
-@app.route('/aggiungi_film') ##riceverà le informazioni sul film da aggiungere e le trasmetterà al db, restituirà un html col risultato dell'operazione
+@app.route('/aggiungi_film', methods =[ "POST"]) ##riceverà le informazioni sul film da aggiungere e le trasmetterà al db, restituirà un html col risultato dell'operazione
 @login_required
 def add_film():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
 
-@app.route('/rimuovi_film') ##riceverà le informazioni sul film da rimuovere e le trasmetterà al db, restituirà un html col risultato dell'operazione
+@app.route('/rimuovi_film', methods =[ "POST"]) ##riceverà le informazioni sul film da rimuovere e le trasmetterà al db, restituirà un html col risultato dell'operazione
 @login_required	
 def remove_film():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -115,27 +126,27 @@ def remove_film():
 def authorizations():
 	utente=load_user(get_id())
 	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
 
-@app.route('/promuovi')  ##elabora la promozione di un utente con i dati ricevuti da /autorizzazioni, restituirà un html col risultato dell'operazione
+@app.route('/promuovi' , methods =[ "POST"])  ##elabora la promozione di un utente con i dati ricevuti da /autorizzazioni, restituirà un html col risultato dell'operazione
 @login_required
 def promote():
 	utente=load_user(get_id())
 	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
 		
-@app.route('/declassa')  ##elabora il declassamento di un utente con i dati ricevuti da /autorizzazioni, restituirà un html col risultato dell'operazione
+@app.route('/declassa' , methods =[ "POST"])  ##elabora il declassamento di un utente con i dati ricevuti da /autorizzazioni, restituirà un html col risultato dell'operazione
 @login_required
 def downgrade():
 	utente=load_user(get_id())
 	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -144,25 +155,25 @@ def downgrade():
 @login_required
 def manage_projection():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato		
 		
-@app.route('/aggiungi_proiezione') ##elabora la richiesta di aggiungere una nuova proiezione da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
+@app.route('/aggiungi_proiezione' , methods =[ "POST"]) ##elabora la richiesta di aggiungere una nuova proiezione da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
 @login_required
 def add_projection():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
 
-@app.route('/chiudi_proiezione') ##elabora la richiesta di chiudere le prenotazioni per una proiezione proveniente da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
+@app.route('/chiudi_proiezione' , methods =[ "POST"]) ##elabora la richiesta di chiudere le prenotazioni per una proiezione proveniente da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
 @login_required
 def close_projection():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -171,7 +182,7 @@ def close_projection():
 @login_required
 def stats():
 	if is_admin(load_user(get_id())) :
-		return 
+		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -181,18 +192,22 @@ def stats():
 @app.route('/personale') ## pagina personale dell'utente dalla quale può controllare i suoi dati, le prenotazioni e fare nuovi prenotazioni
 @login_required
 def personal():
-	return render_template("area_personale.html", utente=load_user(get_id()))
-
+	##return render_template("area_personale.html", utente=load_user(get_id()))
+	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	
 @app.route('/prenotazioni') ##mostra la lista delle prenotazioni effettuate
 @login_required
 def bookings():
-	return render_template("prenotazioni.html", prenotazioni=prenotazioni_utente(get_id()))
-
+	##return render_template("prenotazioni.html", prenotazioni=prenotazioni_utente(get_id()))
+	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	
 @app.route('/prenotabili') ##mostra tutte le proiezioni prenotabili e dà un form per effettuare una prenotazione
 def programmazione():
-
-@app.route('/prenota', proiezione_id) ##elabora la prenotazione, restituirà un html col risultato dell'operazione
+	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	
+@app.route('/prenota', methods =[ "POST"]) ##elabora la prenotazione, restituirà un html col risultato dell'operazione
 @login_required
 def prenota():
+	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 
