@@ -11,6 +11,7 @@ table, th, td {
 <body>
 	<a href="/accedi">Login</a> <br/>
 	<a href="/registrati">Registrati</a> <br/>
+	<a href="/logout">Logout</a> <br/>
 	<a href="/personale">Controlla i tuoi dati e le tue prenotazioni</a> <br/>
 	{% if proiezioni %}
 	<table>
@@ -18,7 +19,10 @@ table, th, td {
 			<th>Data</th>
 			<th>Sala</th>
 			<th>Film</th>
-			<th>Durata</th>
+			<th>Durata</th>	
+			<th>Anno Pubblicazionw</th>
+			<th>Regista</th>
+			<th>Genere</th>
 		</tr>
 		{% for proiezione  in proiezioni %}
 		<tr>
@@ -26,6 +30,9 @@ table, th, td {
 			<td> {{ proiezione.2 }} </td>
 			<td> {{ proiezione.8 }} </td>
 			<td> {{ proiezione.9 }} </td>
+			<td> {{ proiezione.10 }} </td>
+			<td> {{ proiezione.11 }} </td>
+			<td> {{ proiezione.12 }} </td>
 		</tr>
 		{% endfor %}
 	</table>

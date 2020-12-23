@@ -1,6 +1,12 @@
 <html>
 <head>
 <title>Programmazione</title>
+	<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
 </head>
 <body>
 	<a href="/">Torna</a>
@@ -12,6 +18,9 @@
 			<th>Data</th>
 			<th>Sala</th>
 			<th>Durata</th>
+			<th>Anno Pubblicazionw</th>
+			<th>Regista</th>
+			<th>Genere</th>
 		</tr>
 		{% for proiezione  in proiezioni %}
 		<tr>
@@ -19,6 +28,9 @@
 			<td> {{ proiezione.2 }} </td>
 			<td> {{ proiezione.8 }} </td>
 			<td> {{ proiezione.9 }} </td>
+			<td> {{ proiezione.10 }} </td>
+			<td> {{ proiezione.11 }} </td>
+			<td> {{ proiezione.12 }} </td>
 		</tr>
 		{% endfor %}
 	</table>

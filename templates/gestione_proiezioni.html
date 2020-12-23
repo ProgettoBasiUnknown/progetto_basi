@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>Gestisci Proiezioni</title>
+	<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+	<a href="/gestione">Torna indietro</a><br>
+	<br>
+	<h1>AGGIUNGI PROIEZIONE</h1>
+	Aggiungi una proiezione, consultando sale e film disponibili nelle tabelle sottostanti (si raccomanda di controllare le proiezioni preesitenti per evitare sovrapposizioni )
+	<form action="/aggiungi_proiezione" method="POST">
+	<label for="idata">Data:</label>
+	<br>
+	<input type="text" id="idata" name="data" type="text">
+	<br>
+	<label for="isala">Sala:</label>
+	<br>
+	<input type="text" id="isala" name="sala"type="number">
+	<br>
+	<label for="ifilm">Id film:</label>
+	<br>
+	<input type="text" id="ifilm" name="film"type="number">
+	<br>
+	<label for="iprezzo">Prezzo Biglietto:</label>
+	<br>
+	<input type="text" id="ibiglietto" name="biglietto"type="number">
+	<br>
+	<input type="submit" value="Aggiungi proiezione"> 
+	</form>
+	<br>
+	{% if sale %}
+	<table>
+		<tr>
+			<th>ID/numero Sale</th>
+			
+		</tr>
+		{% for proiezione  in proiezioni %}
+		<tr>
+			<td> {{ proiezione.0}} </td>
+			
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	{% if proiezioni %}
+	<table>
+		<tr>
+			<th>ID Film</th>
+			<th>Titolo</th>
+			<th>Durata</th>
+			<th>Pubblicazione</th>
+			<th>Regista</th>
+			<th>Genere</th>
+		</tr>
+		{% for proiezione  in proiezioni %}
+		<tr>
+			<td> {{ proiezione.0}} </td>
+			<td> {{ proiezione.1}} </td>
+			<td> {{ proiezione.2 }} </td>
+			<td> {{ proiezione.3 }} </td>
+			<td> {{ proiezione.4 }} </td>
+			<td> {{ proiezione.5 }} </td>
+			<td> {{ proiezione.11 }} </td>
+			<td> {{ proiezione.12 }} </td>
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	
+	
+	
+	
+	<h1>CHIUDI PRENOTAZIONI</h1>
+	Inserisci la chiave della proiezioni alla quale interrompere le prenotazioni
+	<br>
+	<form action="/" method="POST">
+	<input name="chiave" type="number">
+	<input type="submit" value="Chiudi le prenotazioni"> 
+	</form>
+	
+	{% if proiezioni %}
+	<table>
+		<tr>
+			<th>ID Proiezioni</th>
+			<th>Film</th>
+			<th>Data</th>
+			<th>Sala</th>
+			<th>Durata</th>
+			<th>Anno Pubblicazionw</th>
+			<th>Regista</th>
+			<th>Genere</th>
+		</tr>
+		{% for proiezione  in proiezioni %}
+		<tr>
+			<td> {{ proiezione.0}} </td>
+			<td> {{ proiezione.1}} </td>
+			<td> {{ proiezione.2 }} </td>
+			<td> {{ proiezione.8 }} </td>
+			<td> {{ proiezione.9 }} </td>
+			<td> {{ proiezione.10 }} </td>
+			<td> {{ proiezione.11 }} </td>
+			<td> {{ proiezione.12 }} </td>
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+</body>
+</html>
