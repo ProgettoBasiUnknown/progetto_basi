@@ -183,8 +183,7 @@ def inserimento_proiezione(orario, salaID, filmID, prezzo):
 #richiede: ID(int)
 def elimina_film(id): 
 	conn=engine.connect()
-	u=film.update().values(availability = False).where(film.c.CODICE == id)
-	conn.execute(u)
+	conn.execute(film.update().values(availability = False).where(film.c.CODICE == id))
 	conn.close()
 
 #########################################################################################
@@ -310,6 +309,15 @@ def verifica_credenziali(mail, password):
 			return user['ID']
 		else:
 			return -1
+
+#########################################################################################
+
+#azione:
+#richiede:
+def disabilita_proiezione(k):
+	conn=engine.connect()
+	conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.ETICHETTA == k))
+	conn.close()
 
 #########################################################################################
 
