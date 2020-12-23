@@ -49,7 +49,7 @@ def programmazione():
 
 @app.route('/accedi')	##pagina per fare il login
 def access():
-	if current_user.is_authenticated():
+	if current_user.is_authenticated:
 		return render_template("area_personale.html", utente=load_user(get_id()))
 	else:
 		return render_template("accesso.html") ##fatta(scarnissima)
@@ -61,13 +61,13 @@ def logger():
 	id_ricevuto = verifica_credenziali(mail,pwd) ##verifica_credenziali torna -2 se non esiste la mail nel db e -1 se la pwd è errata, restituirà un html col risultato dell'operazione
 	if( id_ricevuto >= 0):
 		login_user(load_user(id_ricevuto))
-		return render_template("risulato.html", result=True , link="/personale")			##se i dati sono giusti va nell'area riservata
+		return render_template("risultato.html", result=True , link="/personale")			##se i dati sono giusti va nell'area riservata
 	else:		
-		return render_template("risulato.html", result=False , link="/login")		##se o dati sono errati torna alla home
+		return render_template("risultato.html", result=False , link="/login")		##se o dati sono errati torna alla home
 
 @app.route('/registrati')	##campi dati da riempire per registrarsi
 def register():
-	if current_user.is_authenticated():
+	if current_user.is_authenticated:
 		return render_template("area_personale.html", utente=load_user(get_id()))
 	else:
 		return render_template("registrazione.html")
@@ -82,7 +82,7 @@ def registerer():
 	if(verifica_mail_db(m)):
 		risultato = User(inserimento_utente(n,c,m,p,t))
 		login_user(risultato)
-		return render_template("risulato.html", result=True , link="/personale")
+		return render_template("risultato.html", result=True , link="/personale")
 		
 	
 @app.route('/gestione')##home del gestore, dove può scegliere se gestire film/proiezioni, promuovere/declassare utenti/gestori (se è un gestore proprietario) e controllare le statistiche
