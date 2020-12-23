@@ -62,9 +62,11 @@ def start_db():
 	#inserimento 2 nuovi utenti iniziali (gestori), gli ID 0 e 1 hanno potere di assumere o licenziare utenti
 	insu = utenti.insert()
 	conn.execute(insu,[
-		{'nome': "Luca", 'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936",'telefono': 875936, 'gestore': True},
-		{'nome': "Lorenzo", 'cognome': "Piva",       'email': "873775@stud.unive.it", 'password': "873775",'telefono': 873775, 'gestore': False}, 
-		{'nome': "Radu", 'cognome': "Novac", 'email': "857630@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True}
+		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': 875936, 'gestore': True},
+		{'nome': "Lorenzo", 'cognome': "Piva",       'email': "873775@stud.unive.it", 'password': "873775", 'telefono': 873775, 'gestore': True}, 
+		{'nome': "Radu",    'cognome': "Novac",      'email': "857630@stud.unive.it", 'password': "857630", 'telefono': 857630, 'gestore': True}, 
+		{'nome': "Mario",   'cognome': "Rossi",      'email': "mario@stud.it",  	  'password': "mario",  'telefono': 4316,   'gestore': False}
+
 		]) 
 	#inserimento 3 nuovi film
 	insf = film.insert()
@@ -181,7 +183,8 @@ def inserimento_proiezione(orario, salaID, filmID, prezzo):
 #richiede: ID(int)
 def elimina_film(id): 
 	conn=engine.connect()
-	conn.execute(film.update().values(availability = false).where(film.c.ID==id))
+	u=film.update().values(availability = False).where(film.c.CODICE == id)
+	conn.execute(u)
 	conn.close()
 
 #########################################################################################
@@ -254,13 +257,18 @@ def richiesta_prenotazioni_utente(id):
 
 #########################################################################################
 
-#azione: restituire tutti i film disponibili nella tabella
-#richiede: nada
-def richiesta_tabella_film():
+#azione: restituisce tutti i film oppure solo quelli disponibili, dipende dal parametro passato
+#richiede: condizione(str)
+def richiesta_tabella_film(cond):	
 	conn = engine.connect()
-	out = conn.execute(select([film])).fetchall()
-	conn.close()
-	return out
+	if(cond==True):
+		out = conn.execute(select([film])).fetchall()
+		conn.close()
+		return out
+	else:
+		out = conn.execute(select([film]).where(film.c.availability==True)).fetchall()
+		conn.close()
+		return out
 
 #########################################################################################
 	
@@ -310,11 +318,21 @@ def verifica_credenziali(mail, password):
 
 #########################################################################################
 
-#def stampa():
-#
-#	tutteproiezioni = richiesta_tabella_proiezioni()
-#	for a in tutteproiezioni:
-#		print(a)
+def stampa():
+
+	tuttifilm = richiesta_tabella_film("")
+	for a in tuttifilm:
+		print(a)
+	elimina_film(2)
+	print("--------------------__-----")
+	filmdispo = richiesta_tabella_film("")
+	for a in filmdispo:
+		print(a)
+	elimina_film(1)
+	print("--------------------__-----")
+	filds = richiesta_tabella_film("all")
+	for a in filds:
+		print(a)
 
 
 #	conn = engine.connect()
