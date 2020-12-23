@@ -1,6 +1,7 @@
 from flask import *
 from flask_login import *
 from sqlalchemy import *
+from data import *
 app= Flask(__name__)
 app.config[ 'SECRET_KEY'] = 'shish'
 login_manager = LoginManager()
@@ -32,11 +33,11 @@ class User( UserMixin ):
 def load_user(user_id):
 		utente=richiesta_utente(user_id)
 		risposta = User(utente)
-	return risposta#######################
+		return risposta
 
 @app.route('/') ##home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, spetta a noi decidere
 def home():		##quante proiezioni mostrare, magari troncando la lista qui o non leggendola tutta nel documento html
-	if is_authenticated() and is_admin(load_user(get_id())):	
+	if current_user.is_authenticated and is_admin(load_user(get_id())):	
 		return redirect("/gestore")
 	else: 
 		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
@@ -47,8 +48,8 @@ def programmazione():
 		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni())
 
 @app.route('/accedi')	##pagina per fare il login
-def access()
-	if is_authenticated():
+def access():
+	if current_user.is_authenticated():
 		return render_template("area_personale.html", utente=load_user(get_id()))
 	else:
 		return render_template("accesso.html") ##fatta(scarnissima)
@@ -61,18 +62,18 @@ def logger():
 	if( id_ricevuto >= 0):
 		login_user(load_user(id_ricevuto))
 		return render_template("risulato.html", result=True , link="/personale")			##se i dati sono giusti va nell'area riservata
-			
-	return return render_template("risulato.html", result=False , link="/login")		##se o dati sono errati torna alla home
+	else:		
+		return render_template("risulato.html", result=False , link="/login")		##se o dati sono errati torna alla home
 
 @app.route('/registrati')	##campi dati da riempire per registrarsi
-def register()
-	if is_authenticated():
+def register():
+	if current_user.is_authenticated():
 		return render_template("area_personale.html", utente=load_user(get_id()))
 	else:
 		return render_template("registrazione.html")
 
 @app.route('/registrazione', methods =[ "POST"]) ##riceve i dati da /registrati , e li passa ad una funzione che controlla ed eventuamente registra nel db, restituirà un html col risultato dell'operazione
-def registerer()
+def registerer():
 	n=request.form['nome']
 	c=request.form['cognome']
 	m=request.form['email']
@@ -193,21 +194,21 @@ def stats():
 @login_required
 def personal():
 	##return render_template("area_personale.html", utente=load_user(get_id()))
-	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 @app.route('/prenotazioni') ##mostra la lista delle prenotazioni effettuate
 @login_required
-def bookings():
+def booked():
 	##return render_template("prenotazioni.html", prenotazioni=prenotazioni_utente(get_id()))
-	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 @app.route('/prenotabili') ##mostra tutte le proiezioni prenotabili e dà un form per effettuare una prenotazione
-def programmazione():
-	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+def prenotabili():
+	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 @app.route('/prenota', methods =[ "POST"]) ##elabora la prenotazione, restituirà un html col risultato dell'operazione
 @login_required
 def prenota():
-	render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 
