@@ -162,7 +162,7 @@ def downgrade():
 @login_required
 def manage_projection():
 	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni() , film = richiesta_tabella_film("") , sale = richiesta_tabella_sale() ) 
+		return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni() , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
 	else:
 		return redirect('/accedi')
 			#accesso negato		
@@ -171,6 +171,14 @@ def manage_projection():
 @login_required
 def add_projection():
 	if is_admin(load_user(current_user.get_id())) :
+		anno = request.form['anno']
+		mese = request.form['mese']
+		giorno = request.form['giorno']
+		data = datetime.datetime(int(anno),int(mese),int(giorno))
+		sala = request.form['sala']
+		film = request.form['film']
+		prezzo = request.form['biglietto']
+		inserimento_proiezione(data,sala,film,prezzo)
 		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
