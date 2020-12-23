@@ -179,7 +179,7 @@ def add_projection():
 		film = request.form['film']
 		prezzo = request.form['biglietto']
 		inserimento_proiezione(data,sala,film,prezzo)
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+		return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -188,8 +188,9 @@ def add_projection():
 @login_required
 def close_projection():
 	if is_admin(load_user(current_user.get_id())) :
-		c=request.form['chiave']
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+		chiave=request.form['chiave']
+		disabilita_proiezione(chiave)
+		return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
 	else:
 		return redirect('/accedi')
 			#accesso negato	
