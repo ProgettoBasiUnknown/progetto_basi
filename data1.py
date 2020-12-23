@@ -1,6 +1,7 @@
+import datetime
 import sqlalchemy
 from sqlalchemy import *
-from datetime import datetime
+
 
 engine = create_engine('sqlite:///file.db', echo = True)
 metadata = MetaData() #da finire bene quando si fanno i vari file-moduli
@@ -231,7 +232,7 @@ def inserisci_prenotazione(posto, proiezione, cliente):
 #richiede: nada
 def richiesta_tabella_proiezioni():
 	conn = engine.connect()
-	out = conn.execute(select([proiezioni]).order_by('dataora')).fetchall()
+	out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()
 	conn.close()
 	return out
 
@@ -303,13 +304,11 @@ def verifica_credenziali(mail, password):
 
 #########################################################################################
 
-def stampa():
-	p = verifica_credenziali("857936@stud.unive.it", "875936")
-	print(p)
-
-	tuttesale = richiesta_tabella_sale()
-	for a in tuttesale:
-		print(a)
+#def stampa():
+#
+#	tutteproiezioni = richiesta_tabella_proiezioni()
+#	for a in tutteproiezioni:
+#		print(a)
 
 
 #	conn = engine.connect()
@@ -323,6 +322,14 @@ def stampa():
 
 #########################################################################################
 
+
+
 start_db()
-stampa()
+#
+#inserimento_proiezione(datetime.datetime(2018, 6, 1), 2, 1, 8);
+#inserimento_proiezione(datetime.datetime(2020, 6, 2), 4, 4, 10);
+#inserimento_proiezione(datetime.datetime(2019, 7, 5), 1, 2, 9);
+
+
+#stampa()
 
