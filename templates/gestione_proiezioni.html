@@ -14,9 +14,17 @@ table, th, td {
 	<h1>AGGIUNGI PROIEZIONE</h1>
 	Aggiungi una proiezione, consultando sale e film disponibili nelle tabelle sottostanti (si raccomanda di controllare le proiezioni preesitenti per evitare sovrapposizioni )
 	<form action="/aggiungi_proiezione" method="POST">
-	<label for="idata">Data:</label>
+	<label for="ianno">Anno:</label>
 	<br>
-	<input type="text" id="idata" name="data" type="text">
+	<input type="text" id="ianno" name="anno" type="number">
+	<br>
+	<label for="imese">Mese:</label>
+	<br>
+	<input type="text" id="imese" name="mese" type="number">
+	<br>
+	<label for="igiorno">Giorno:</label>
+	<br>
+	<input type="text" id="igiorno" name="giorno" type="number">
 	<br>
 	<label for="isala">Sala:</label>
 	<br>
@@ -39,15 +47,16 @@ table, th, td {
 			<th>ID/numero Sale</th>
 			
 		</tr>
-		{% for proiezione  in proiezioni %}
+		{% for sala  in sale %}
 		<tr>
-			<td> {{ proiezione.0}} </td>
+			<td> {{ sala.0}} </td>
 			
 		</tr>
 		{% endfor %}
-	</table>
 	{% endif %}
-	{% if proiezioni %}
+	<br>
+	</table>
+	{% if film %}
 	<table>
 		<tr>
 			<th>ID Film</th>
@@ -57,26 +66,24 @@ table, th, td {
 			<th>Regista</th>
 			<th>Genere</th>
 		</tr>
-		{% for proiezione  in proiezioni %}
+		{% for f  in film %}
 		<tr>
-			<td> {{ proiezione.0}} </td>
-			<td> {{ proiezione.1}} </td>
-			<td> {{ proiezione.2 }} </td>
-			<td> {{ proiezione.3 }} </td>
-			<td> {{ proiezione.4 }} </td>
-			<td> {{ proiezione.5 }} </td>
-			<td> {{ proiezione.11 }} </td>
-			<td> {{ proiezione.12 }} </td>
+			<td> {{ f.0}} </td>
+			<td> {{ f.1}} </td>
+			<td> {{ f.2 }} </td>
+			<td> {{ f.3 }} </td>
+			<td> {{ f.4 }} </td>
+			<td> {{ f.5 }} </td>
 		</tr>
 		{% endfor %}
 	</table>
 	{% endif %}
-	
+	<br>
 	
 	
 	
 	<h1>CHIUDI PRENOTAZIONI</h1>
-	Inserisci la chiave della proiezioni alla quale interrompere le prenotazioni
+	Inserisci la chiave della proiezione alla quale interrompere le prenotazioni
 	<br>
 	<form action="/" method="POST">
 	<input name="chiave" type="number">
@@ -98,9 +105,9 @@ table, th, td {
 		{% for proiezione  in proiezioni %}
 		<tr>
 			<td> {{ proiezione.0}} </td>
-			<td> {{ proiezione.1}} </td>
+			<td> {{ proiezione.8}} </td>
+			<td> {{ proiezione.1 }} </td>
 			<td> {{ proiezione.2 }} </td>
-			<td> {{ proiezione.8 }} </td>
 			<td> {{ proiezione.9 }} </td>
 			<td> {{ proiezione.10 }} </td>
 			<td> {{ proiezione.11 }} </td>
