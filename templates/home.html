@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title>Home</title>
+	<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+	<a href="/accedi">Login</a> <br/>
+	<a href="/registrati">Registrati</a> <br/>
+	<a href="/personale">Controlla i tuoi dati e le tue prenotazioni</a> <br/>
+	{% if proiezioni %}
+	<table>
+		<tr>
+			<th>Data</th>
+			<th>Sala</th>
+			<th>Film</th>
+			<th>Durata</th>
+		</tr>
+		{% for proiezione  in proiezioni %}
+		<tr>
+			<td> {{ proiezione.1}} </td>
+			<td> {{ proiezione.2 }} </td>
+			<td> {{ proiezione.8 }} </td>
+			<td> {{ proiezione.9 }} </td>
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	<a href="/programmazione">Programmazione completa</a>
+</body>
+</html>
