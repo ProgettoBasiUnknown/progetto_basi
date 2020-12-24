@@ -39,10 +39,10 @@ def load_user(user_id):
 def home():		
 	if current_user.is_authenticated :#controlla se si è già loggati
 		u=load_user(current_user.get_id())
-		if is_admin(u):#se si è loggati come gestore, la home reindirizzerà alla pagina di gestione
-			return redirect("/gestore")
+		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
+		if is_admin(u):
+			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u , gestore = True)
 		else: 
-			proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
 			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u)#altrimenti se si è un utente normale, si apre la pagina principale, mostrando un messaggio di benvenuto personalizzato e le opzioni per gli utenti registrati
 	else: 
 		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
@@ -230,7 +230,7 @@ def stats():
 @login_required
 def personal():
 	##return render_template("area_personale.html", utente=load_user(current_user.get_id()))
-	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	return render_template('personale.html' , profilo = richiesta_utente(current_user.get_id()))##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 @app.route('/prenotazioni') ##mostra la lista delle prenotazioni effettuate
 @login_required
