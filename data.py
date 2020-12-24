@@ -15,7 +15,7 @@ utenti = Table('utenti', metadata,
 	Column('cognome', String),
 	Column('email', String),
 	Column('password', String),
-	Column('telefono', Integer),
+	Column('telefono', String),
 	Column('gestore', Boolean))
 
 prenotazioni = Table('prenotazioni', metadata,
@@ -63,10 +63,10 @@ def start_db():
 	#inserimento 4 nuovi utenti iniziali, gli ID 1-2-3 hanno sempre potere di assumere o licenziare utenti e non devono essere licenziati
 	insu = utenti.insert()
 	conn.execute(insu,[
-		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': 875936, 'gestore': True},
-		{'nome': "Lorenzo", 'cognome': "Piva",       'email': "873775@stud.unive.it", 'password': "873775", 'telefono': 873775, 'gestore': True}, 
-		{'nome': "Radu",    'cognome': "Novac",      'email': "857630@stud.unive.it", 'password': "857630", 'telefono': 857630, 'gestore': True}, 
-		{'nome': "Mario",   'cognome': "Rossi",      'email': "mario@stud.it",  	  'password': "mario",  'telefono': 4316,   'gestore': False}
+		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': "875936", 'gestore': True},
+		{'nome': "Lorenzo", 'cognome': "Piva",       'email': "873775@stud.unive.it", 'password': "873775", 'telefono': "873775", 'gestore': True}, 
+		{'nome': "Radu",    'cognome': "Novac",      'email': "857630@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True}, 
+		{'nome': "Mario",   'cognome': "Rossi",      'email': "mario@stud.it",  	  'password': "mario",  'telefono': "4316",   'gestore': False}
 
 		]) 
 	#inserimento 3 nuovi film
@@ -137,10 +137,6 @@ def start_db():
 	#inspro = prenotazioni.insert()
 	#conn.execute(inspro,[])
 	conn.close()
-	inserimento_proiezione(datetime.datetime(2018, 6, 1), 2, 1, 8)
-	inserimento_proiezione(datetime.datetime(2020, 6, 2), 4, 4, 10)
-	inserimento_proiezione(datetime.datetime(2019, 7, 5), 1, 2, 9)
-
 
 #########################################################################################
 
@@ -229,13 +225,16 @@ def licenzia(id):
 #########################################################################################
 
 #azione: aggiungere prenotazione
-#richiede: il posto prenotato(int), proiezione acquistata(int), cliente(int)
-def inserisci_prenotazione(posto, proiezione, cliente):
+#richiede: posti prenotati(int), proiezione acquistata(int), cliente(int), numero posti prenotati(int)
+def inserisci_prenotazione(posti, proiezione, cliente, num_posti):
 	conn = engine.connect()
 	conn.execute(prenotazioni.insert(),
-		[{'posti_prenotati': posto, 'proiezione': proiezione, 'cliente': cliente}])
+		[{'posti_prenotati': posti, 'proiezione': proiezione, 'cliente': cliente}])
+	vd = conn.execute(select([proiezioni.c.vendite]).where(proiezioni.c.ETICHETTA == proiezione)).first()
+	new_vendite = num_posti + vd[0]
+	conn.execute(proiezioni.update().values(vendite = new_vendite).where(proiezioni.c.ETICHETTA == proiezione))
 	conn.close()
-	#eventuali controlli li metto dopo
+
 #########################################################################################
 
 #azione: restituire tutta la tabella utenti (tranne i primi 3) e serve per visualizzare chi poter promuovere o licenziare
@@ -349,39 +348,22 @@ def disabilita_proiezione(k):
 
 #########################################################################################
 
-#SELECT SUM (Prezzo * Quantita) AS 'Totale'
-#FROM Vendite
-#WHERE Giorno ='01/01/2016'
+def calcola_vendite(p):
+	out = 0
+	for a in p:
+		out += a[0]
+	return out
 
-#DEVO RITORNARE LA SOMMA DELLE VENDITE E SOLDI INCASSATI, COME ARRAY DI DIMENSIONE 2
-#s = text(" SELECT * FROM users WHERE id =: user_id ")
-#results = conn.execute(s, user_id =2)
-#azione: restituisce tutti i record di una tabella dello stesso anno, serve per visualizzare le statistiche di vendita
+#azione:ritorna tutte le vendite di tutte le proiezioni dello stesso anno
 #richiede: anno(int)
-#def statistiche_vendite_annuali(anno):
-#	first = datetime.datetime(anno,1,1)		
-#	last = datetime.datetime(anno+1,1,1)
-#	conn=engine.connect()
-#	g= text("SELECT SUM vendite FROM proiezioni WHERE dataora>d AND dataora<d")
-#	GEN =conn.execute()
-#	FEB =conn.execute()
-#	MAR =conn.execute()
-#	APR =conn.execute()
-#	MAG =conn.execute()
-#	GIU =conn.execute()
-#	LUG =conn.execute()
-#	AGO =conn.execute()
-#	SET =conn.execute()
-#	OTT =conn.execute()
-#	NOV =conn.execute()
-#	DIC =conn.execute()
-#	conn.close()
-#	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC],[]]
 
-#########################################################################################
-
-#azione:
-#richiede:
+def richiesta_vendite_annuali(anno):
+	conn = engine.connect()
+	d1 = datetime.datetime(anno,1,1)
+	d2 = datetime.datetime(anno+1,1,1)
+	out = conn.execute(select([proiezioni.c.vendite]).where(and_(proiezioni.c.dataora>d1, proiezioni.c.dataora<d2))).fetchall()
+	conn.close()
+	return calcola_vendite(out)
 
 #########################################################################################
 
@@ -418,13 +400,61 @@ def stampa():
 #	while(row != None):
 #		print(row)
 #		row = results.fetchone()
+#SELECT SUM (Prezzo * Quantita)
+#FROM Vendite
+#WHERE Giorno ='01/01/2016'
 
+#DEVO RITORNARE LA SOMMA DELLE VENDITE E SOLDI INCASSATI, COME ARRAY DI DIMENSIONE 2
 
-#########################################################################################
+#s = text(" SELECT * FROM users WHERE id =: user_id ")
+#results = conn.execute(s, user_id =2)
+#azione: restituisce tutti i record di una tabella dello stesso anno, serve per visualizzare le statistiche di vendita
+#richiede: anno(int)
+#def statistiche_vendite_annuali(anno):
+#	first = datetime.datetime(anno,1,1)		
+#	last = datetime.datetime(anno+1,1,1)
+#	conn=engine.connect()
+#	g= text("SELECT SUM vendite FROM proiezioni WHERE dataora>d AND dataora<d")
+#	GEN =conn.execute()
+#	FEB =conn.execute()
+#	MAR =conn.execute()
+#	APR =conn.execute()
+#	MAG =conn.execute()
+#	GIU =conn.execute()
+#	LUG =conn.execute()
+#	AGO =conn.execute()
+#	SET =conn.execute()
+#	OTT =conn.execute()
+#	NOV =conn.execute()
+#	DIC =conn.execute()
+#	conn.close()
+#	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC],[]]
+
 
 
 
 #start_db()
+
+inserimento_proiezione(datetime.datetime(2020,2,3),4,2,6)
+inserimento_proiezione(datetime.datetime(2020,5,13),4,2,6)
+inserimento_proiezione(datetime.datetime(2020,11,23),4,2,7)
+inserimento_proiezione(datetime.datetime(2020,12,8),4,2,6)
+inserimento_proiezione(datetime.datetime(2020,6,18),4,2,7)
+inserimento_proiezione(datetime.datetime(2020,12,14),4,2,6)
+inserimento_proiezione(datetime.datetime(2020,2,6),4,2,6)
+inserimento_proiezione(datetime.datetime(2020,2,7),4,2,7)
+inserimento_proiezione(datetime.datetime(2020,12,1),4,2,6)
+inserimento_proiezione(datetime.datetime(2018, 6, 1), 2, 1, 8)
+inserimento_proiezione(datetime.datetime(2020, 6, 2), 4, 4, 10)
+inserimento_proiezione(datetime.datetime(2019, 7, 5), 1, 2, 9)
+
+
+inserisci_prenotazione("23-24", 3, 4, 434)
+inserisci_prenotazione("23-24", 3, 4, 45)
+
+print("\n\n\n")
+print(richiesta_vendite_annuali(2020))
+print("\n\n\n")
 
 #
 #stampa()
