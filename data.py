@@ -210,9 +210,10 @@ def richiesta_utente(id):
 #azione: promuove utente a gestore, operazione per soli admin
 #richiede: ID(int)
 def promuovi(id):
-	conn = engine.connect()
-	conn.execute(utenti.update().values(gestore = True).where(utenti.c.ID == id))
-	conn.close()
+	if (id>3):
+		conn = engine.connect()
+		conn.execute(utenti.update().values(gestore = True).where(utenti.c.ID == id))
+		conn.close()
 
 #########################################################################################
 
@@ -355,7 +356,6 @@ def stampa():
 
 
 
-start_db()
+#start_db()
 #
-stampa()
-
+#stampa()

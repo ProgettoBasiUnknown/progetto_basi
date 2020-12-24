@@ -104,7 +104,7 @@ def gestore():
 @login_required
 def film_managing():
 	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+		return render_template('gestione_films.html', films = richiesta_tabella_film(True))##ANCORA DA SISTEMARE!!!!!!!!!!!
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -113,7 +113,13 @@ def film_managing():
 @login_required
 def add_film():
 	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+		titolo = request.form['titolo']
+		durata = request.form['durata']
+		pubblicazione = request.form['pubblicazione']
+		regista = request.form['regista']
+		genere = request.form['genere']
+		inserimento_film(titolo,durata,pubblicazione,regista,genere)
+		return render_template('risultato.html' , result = True, link = '/gestisci_film')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -122,7 +128,9 @@ def add_film():
 @login_required	
 def remove_film():
 	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+		id = request.form['id']
+		elimina_film(id)
+		return  render_template('risultato.html' , result = True, link = '/gestisci_film')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -132,8 +140,8 @@ def remove_film():
 @login_required
 def authorizations():
 	utente=load_user(current_user.get_id())
-	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3) ):
+		return render_template('gestione_autorizzazioni.html', utenti = richiesta_tabella_utenti())
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -142,8 +150,10 @@ def authorizations():
 @login_required
 def promote():
 	utente=load_user(current_user.get_id())
-	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3)  ):
+		u=request.form['id']
+		promuovi(int(u))
+		return render_template('risultato.html' , result = True, link = '/autorizzazioni')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -152,8 +162,10 @@ def promote():
 @login_required
 def downgrade():
 	utente=load_user(current_user.get_id())
-	if (is_admin(utente) and (utente.id== 0 or utente.id== 1 or utente.id== 2) ):
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3)  ):
+		u=request.form['id']
+		licenzia(int(u))
+		return render_template('risultato.html' , result = True, link = '/autorizzazioni')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
