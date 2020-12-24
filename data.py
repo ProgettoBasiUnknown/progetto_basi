@@ -328,8 +328,21 @@ def verifica_credenziali(mail, password):
 #richiede: k(int)
 def disabilita_proiezione(k):
 	conn=engine.connect()
-	conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.ETICHETTA == k))
-	conn.close()
+	check =conn.execute(select([proiezioni]).where(proiezioni.c.ETICHETTA == k)).fetchone()
+	if check != None:#controlla l'esistenza della proiezione
+		tran = conn.begin()
+		try:
+			conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.ETICHETTA == k))#aggiorna la disponibilità
+			tran.commit()
+			conn.close()
+			return True
+		except:
+			tran.rollback
+			conn.close()
+			raise
+		return False	
+	else:
+		return False
 
 #########################################################################################
 
@@ -407,9 +420,8 @@ def stampa():
 #########################################################################################
 
 
-if not(os.path.exists('file.db')):
-	start_db()
-else:
-	print("OK")
+
+#start_db()
+
 #
 #stampa()
