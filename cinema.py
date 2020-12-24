@@ -31,18 +31,23 @@ class User( UserMixin ):
 
 @login_manager.user_loader
 def load_user(user_id):
-		utente=richiesta_utente(user_id)
-		risposta = User(utente)
+		utente=richiesta_utente(user_id)#query al database
+		risposta = User(utente)#istanzio un oggetto di tipo utente
 		return risposta
 
-@app.route('/') ##home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, spetta a noi decidere
-def home():		##quante proiezioni mostrare, magari troncando la lista qui o non leggendola tutta nel documento html
-	if current_user.is_authenticated and is_admin(load_user(current_user.get_id())):	
-		return redirect("/gestore")
+@app.route('/') #home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, le opzioni per loggarsi, registrarsi, consultare programmazione e dati personali
+def home():		
+	if current_user.is_authenticated :
+		u=load_user(current_user.get_id())
+		if is_admin(u):##se si è loggati come gestore, la home reindirizzerà alla pagina di gestione
+			return redirect("/gestore")
+		else: 
+			proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
+			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u)
 	else: 
 		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
-		return render_template("home.html", proiezioni = proiezioni_vicine)##fatta già una bozza
-
+		return render_template("home.html", proiezioni = proiezioni_vicine)
+		
 @app.route('/programmazione') ##mostra tutte le proiezioni 
 def programmazione():
 		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni())
@@ -65,7 +70,7 @@ def logger():
 			return render_template("risultato.html", result=True , link="/gestione")
 		return render_template("risultato.html", result=True , link="/personale")			##se i dati sono giusti va nell'area riservata
 	else:		
-		return render_template("risultato.html", result=False , link="/login")		##se o dati sono errati torna alla home
+		return render_template("risultato.html", result=False , link="/accedi")		##se o dati sono errati torna alla home
 
 @app.route('/registrati')	##campi dati da riempire per registrarsi
 def register():
