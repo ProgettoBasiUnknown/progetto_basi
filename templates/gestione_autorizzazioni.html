@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Gestisci Autorizzazioni</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+{% if utenti %}
+	<table>
+		<tr>
+			<th>ID</th>
+			<th>Nome</th>
+			<th>Cognome</th>
+			<th>Email</th>
+			<th>Gestore</th>
+		</tr>
+	{% for utente in utenti %}
+		<tr>
+			<td>{{utente.0}}</td>
+			<td>{{utente.1}}</td>
+			<td>{{utente.2}}</td>
+			<td>{{utente.3}}</td>
+			<td>{{utente.6}}</td>
+		</tr>	
+	{% endfor %}
+	</table>
+{% endif %}
+	<h1>Promuovi utente</h1>
+	Inserisci l'id dell'utente da promuovere a gestore
+	<br>
+	<form action="/promuovi" method="POST">
+	<input name="id" type="number">
+	<input type="submit" value="Promuovi"> 
+	</form>
+	<h1>Licenzia utente</h1>
+	Inserisci l'id dell'utente da rimuovere dai gestori
+	<br>
+	<form action="/declassa" method="POST">
+	<input name="id" type="number">
+	<input type="submit" value="Licenzia"> 
+	</form>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<html>
+<head>
+<a href="/gestione">Torna indietro</a><br>
+<title>Gestisci films</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<h1>Aggiungi film</h1>
+	
+	<form action="/aggiungi_film" method="POST">
+	<label for="ititolo">Titolo:</label>
+	<br>
+	<input type="text" id="ititolo" name="titolo" type="text">
+	<br>
+	<label for="idurata">Durata:</label>
+	<br>
+	<input type="text" id="idurata" name="durata" type="number">
+	<br>
+	<label for="ipubblicazione">Anno pubblicazione:</label>
+	<br>
+	<input type="text" id="ipubblicazione" name="pubblicazione" type="number">
+	<br>
+	<label for="iregista">Regista:</label>
+	<br>
+	<input type="text" id="iregista" name="regista"type="text">
+	<br>
+	<label for="igenere">Genere:</label>
+	<br>
+	<input type="text" id="igenere" name="genere"type="text">
+	<br>
+	<input type="submit" value="Aggiungi film"> 
+	</form>
+	
+{% if films%}
+	<table>
+		<tr>
+			<th>ID Film</th>
+			<th>Titolo</th>
+			<th>Durata</th>
+			<th>Pubblicazione</th>
+			<th>Regista</th>
+			<th>Genere</th>
+			<th>Disponibilità</th>
+		</tr>
+	{% for film in films %}
+		<tr>
+			<td> {{ film.0}} </td>
+			<td> {{ film.1}} </td>
+			<td> {{ film.2 }} </td>
+			<td> {{ film.3 }} </td>
+			<td> {{ film.4 }} </td>
+			<td> {{ film.5 }} </td>
+			<td> {{ film.6 }} </td>
+		</tr>
+	{% endfor %}
+	</table>
+{% endif %}
+
+<h1>Togli film</h1>
+	
+	<form action="/rimuovi_film" method="POST">
+	<label for="iid">ID film:</label>
+	<br>
+	<input type="text" id="iid" name="id" type="text">
+	<input type="submit" value="Rimuovi disponibilità il film"> 
+	</form>
+</body>
+</html>
