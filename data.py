@@ -248,11 +248,14 @@ def richiesta_tabella_utenti():
 
 #########################################################################################
 
-#azione: restituire lista con tutte le proiezioni programmate
-#richiede: nada
-def richiesta_tabella_proiezioni():
+#azione: restituire lista con tutte le proiezioni programmate, se condizione è false restituisce solo le proiezioni prenotabili
+#richiede: condizione(boolean)
+def richiesta_tabella_proiezioni(condizione):
 	conn = engine.connect()
-	out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()
+	if condizione:
+		out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()
+	else:
+		out = conn.execute(select([proiezioni, film]).where(and_(proiezioni.c.film == film.c.CODICE , proiezioni.c.availability == True)).order_by('dataora')).fetchall()		
 	conn.close()
 	return out
 
@@ -269,7 +272,7 @@ def richiesta_prenotazioni_utente(id):
 #########################################################################################
 
 #azione: restituisce tutti i film oppure solo quelli disponibili, dipende dal parametro passato
-#richiede: condizione(str)
+#richiede: condizione(bool)
 def richiesta_tabella_film(cond):	
 	conn = engine.connect()
 	if(cond==True):

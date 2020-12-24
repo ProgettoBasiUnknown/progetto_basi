@@ -37,20 +37,19 @@ def load_user(user_id):
 
 @app.route('/') #home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, le opzioni per loggarsi, registrarsi, consultare programmazione e dati personali
 def home():		
+	proiezioni_vicine=richiesta_tabella_proiezioni(True)[:4]
 	if current_user.is_authenticated :#controlla se si è già loggati
 		u=load_user(current_user.get_id())
-		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
 		if is_admin(u):
 			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u , gestore = True)
 		else: 
 			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u)#altrimenti se si è un utente normale, si apre la pagina principale, mostrando un messaggio di benvenuto personalizzato e le opzioni per gli utenti registrati
 	else: 
-		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
 		return render_template("home.html", proiezioni = proiezioni_vicine)#se si accede senza essere loggati, si può solo accedere/registrare o controllare la programmazione
 		
 @app.route('/programmazione') #mostra tutte le proiezioni in programma
 def programmazione():
-		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni())
+		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni(True))
 
 @app.route('/accedi')	##pagina per fare il login
 def access():
@@ -179,7 +178,7 @@ def downgrade():
 @login_required
 def manage_projection():
 	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni() , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
+		return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni(True) , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
 	else:
 		return redirect('/accedi')
 			#accesso negato		
