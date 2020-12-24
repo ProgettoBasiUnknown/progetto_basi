@@ -206,8 +206,11 @@ def add_projection():
 def close_projection():
 	if is_admin(load_user(current_user.get_id())) :
 		chiave=request.form['chiave']
-		disabilita_proiezione(chiave)
-		return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
+		result=disabilita_proiezione(chiave)
+		if result:
+			return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
+		else:
+			return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
 	else:
 		return redirect('/accedi')
 			#accesso negato	
