@@ -37,18 +37,18 @@ def load_user(user_id):
 
 @app.route('/') #home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, le opzioni per loggarsi, registrarsi, consultare programmazione e dati personali
 def home():		
-	if current_user.is_authenticated :
+	if current_user.is_authenticated :#controlla se si è già loggati
 		u=load_user(current_user.get_id())
-		if is_admin(u):##se si è loggati come gestore, la home reindirizzerà alla pagina di gestione
+		if is_admin(u):#se si è loggati come gestore, la home reindirizzerà alla pagina di gestione
 			return redirect("/gestore")
 		else: 
 			proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
-			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u)
+			return render_template("home.html", proiezioni = proiezioni_vicine, utente = u)#altrimenti se si è un utente normale, si apre la pagina principale, mostrando un messaggio di benvenuto personalizzato e le opzioni per gli utenti registrati
 	else: 
 		proiezioni_vicine=richiesta_tabella_proiezioni()[:4]
-		return render_template("home.html", proiezioni = proiezioni_vicine)
+		return render_template("home.html", proiezioni = proiezioni_vicine)#se si accede senza essere loggati, si può solo accedere/registrare o controllare la programmazione
 		
-@app.route('/programmazione') ##mostra tutte le proiezioni 
+@app.route('/programmazione') #mostra tutte le proiezioni in programma
 def programmazione():
 		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni())
 
@@ -67,14 +67,14 @@ def logger():
 	if( id_ricevuto >= 0):
 		login_user(load_user(id_ricevuto))
 		if is_admin(load_user(current_user.get_id())) :
-			return render_template("risultato.html", result=True , link="/gestione")
-		return render_template("risultato.html", result=True , link="/personale")			##se i dati sono giusti va nell'area riservata
+			return render_template("risultato.html", result=True , link="/gestione")		#se si accede come gestore si viene reindirizzati alla paginna di gestione
+		return render_template("risultato.html", result=True , link="/personale")			#se i dati sono giusti va nell'area riservata
 	else:		
-		return render_template("risultato.html", result=False , link="/accedi")		##se o dati sono errati torna alla home
+		return render_template("risultato.html", result=False , link="/accedi")		#se o dati sono errati torna alla home
 
-@app.route('/registrati')	##campi dati da riempire per registrarsi
+@app.route('/registrati')	# mostra i campi dati da riempire per registrarsi
 def register():
-	if current_user.is_authenticated:
+	if current_user.is_authenticated: # se l'utente ha già eseguito l'accesso, viene reindirizzato alla pagina personale
 		return render_template("area_personale.html", utente=load_user(current_user.get_id()))
 	else:
 		return render_template("registrazione.html")
@@ -86,15 +86,15 @@ def registerer():
 	m=request.form['email']
 	p=request.form['password']
 	t=request.form['telefono']
-	if(verifica_mail_db(m)):
-		risultato = User(inserimento_utente(n,c,m,p,t))
-		login_user(risultato)
+	if(verifica_mail_db(m)): #verificà unicità della mail
+		risultato = User(inserimento_utente(n,c,m,p,t)) #registrazione utente
+		login_user(risultato) #login utente
 		return render_template("risultato.html", result=True , link="/personale")
 
 @app.route('/logout')
 def logout():
-	logout_user()
-	return render_template("risultato.html", result=True , link="/")
+	logout_user() #logout
+	return render_template("risultato.html", result=True , link="/") #reindirizzamento alla pgina home
 	
 @app.route('/gestione')##home del gestore, dove può scegliere se gestire film/proiezioni, promuovere/declassare utenti/gestori (se è un gestore proprietario) e controllare le statistiche
 @login_required
