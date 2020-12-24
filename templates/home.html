@@ -9,10 +9,16 @@ table, th, td {
 </style>
 </head>
 <body>
-	<a href="/accedi">Login</a> <br/>
-	<a href="/registrati">Registrati</a> <br/>
+	{% if utente %}
+	<h2> benvenuto {{utente.cognome}} {{utente.nome}} </h2>
 	<a href="/logout">Logout</a> <br/>
 	<a href="/personale">Controlla i tuoi dati e le tue prenotazioni</a> <br/>
+	{% else %}
+	<a href="/accedi">Login</a> <br/>
+	<a href="/registrati">Registrati</a> <br/>
+	{% endif %}
+	
+	
 	{% if proiezioni %}
 	<table>
 		<tr>
