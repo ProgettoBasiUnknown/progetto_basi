@@ -59,7 +59,7 @@ metadata.create_all( engine )
 #richiede: nada
 def start_db():
 	conn = engine.connect()
-	#inserimento 2 nuovi utenti iniziali (gestori), gli ID 0 e 1 hanno potere di assumere o licenziare utenti
+	#inserimento 4 nuovi utenti iniziali, gli ID 1-2-3 hanno sempre potere di assumere o licenziare utenti e non devono essere licenziati
 	insu = utenti.insert()
 	conn.execute(insu,[
 		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': 875936, 'gestore': True},
@@ -216,12 +216,13 @@ def promuovi(id):
 
 #########################################################################################
 
-#azione: declassa un gestore a semplice utente, operazione per soli admin
+#azione: declassa un gestore a semplice utente, operazione per soli admin, i numeri <4 saranno ignorati per sicurezza del db
 #richiede: ID(int)
 def licenzia(id):
-	conn = engine.connect()
-	conn.execute(utenti.update().values(gestore = False).where(utenti.c.ID == id))
-	conn.close()
+	if (id>3):
+		conn = engine.connect()
+		conn.execute(utenti.update().values(gestore = False).where(utenti.c.ID == id))
+		conn.close()
 
 #########################################################################################
 
@@ -233,6 +234,15 @@ def inserisci_prenotazione(posto, proiezione, cliente):
 		[{'posti_prenotati': posto, 'proiezione': proiezione, 'cliente': cliente}])
 	conn.close()
 	#eventuali controlli li metto dopo
+#########################################################################################
+
+#azione: restituire tutta la tabella utenti (tranne i primi 3) e serve per visualizzare chi poter promuovere o licenziare
+#richiede: nada
+def richiesta_tabella_utenti():
+	conn = engine.connect()
+	out = conn.execute(select([utenti]).where(utenti.c.ID > 3)).fetchall()
+	conn.close()
+	return out
 
 #########################################################################################
 
@@ -327,21 +337,10 @@ def disabilita_proiezione(k):
 #########################################################################################
 
 def stampa():
-
-	tuttifilm = richiesta_tabella_film("")
-	for a in tuttifilm:
+	licenzia(2)
+	o = richiesta_tabella_utenti();
+	for a in o:
 		print(a)
-	elimina_film(2)
-	print("--------------------__-----")
-	filmdispo = richiesta_tabella_film("")
-	for a in filmdispo:
-		print(a)
-	elimina_film(1)
-	print("--------------------__-----")
-	filds = richiesta_tabella_film("all")
-	for a in filds:
-		print(a)
-
 
 #	conn = engine.connect()
 #	s = select([utenti.c.ID, utenti.c.gestore]) 
@@ -356,7 +355,7 @@ def stampa():
 
 
 
-#start_db()
+start_db()
 #
-#stampa()
+stampa()
 
