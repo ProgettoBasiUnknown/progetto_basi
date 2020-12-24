@@ -1,5 +1,6 @@
 import datetime
 import sqlalchemy
+import os.path
 from sqlalchemy import *
 
 
@@ -323,12 +324,63 @@ def verifica_credenziali(mail, password):
 
 #########################################################################################
 
-#azione:
-#richiede:
+#azione: cambia la disponibilità di una prenotazione in false, così da non essere più prenotabile
+#richiede: k(int)
 def disabilita_proiezione(k):
 	conn=engine.connect()
 	conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.ETICHETTA == k))
 	conn.close()
+
+#########################################################################################
+
+#SELECT SUM (Prezzo * Quantita) AS 'Totale'
+#FROM Vendite
+#WHERE Giorno ='01/01/2016'
+
+#DEVO RITORNARE LA SOMMA DELLE VENDITE E SOLDI INCASSATI, COME ARRAY DI DIMENSIONE 2
+#s = text(" SELECT * FROM users WHERE id =: user_id ")
+#results = conn.execute(s, user_id =2)
+#azione: restituisce tutti i record di una tabella dello stesso anno, serve per visualizzare le statistiche di vendita
+#richiede: anno(int)
+#def statistiche_vendite_annuali(anno):
+#	first = datetime.datetime(anno,1,1)		
+#	last = datetime.datetime(anno+1,1,1)
+#	conn=engine.connect()
+#	g= text("SELECT SUM vendite FROM proiezioni WHERE dataora>d AND dataora<d")
+#	GEN =conn.execute()
+#	FEB =conn.execute()
+#	MAR =conn.execute()
+#	APR =conn.execute()
+#	MAG =conn.execute()
+#	GIU =conn.execute()
+#	LUG =conn.execute()
+#	AGO =conn.execute()
+#	SET =conn.execute()
+#	OTT =conn.execute()
+#	NOV =conn.execute()
+#	DIC =conn.execute()
+#	conn.close()
+#	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC],[]]
+
+#########################################################################################
+
+#azione:
+#richiede:
+
+#########################################################################################
+
+#azione:
+#richiede:
+
+#########################################################################################
+
+#azione:
+#richiede:
+
+#########################################################################################
+
+#azione:
+#richiede:
 
 #########################################################################################
 
@@ -355,7 +407,9 @@ def stampa():
 #########################################################################################
 
 
-
-#start_db()
+if not(os.path.exists('file.db')):
+	start_db()
+else:
+	print("OK")
 #
 #stampa()
