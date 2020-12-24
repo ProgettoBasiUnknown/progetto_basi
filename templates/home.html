@@ -17,8 +17,9 @@ table, th, td {
 	<a href="/accedi">Login</a> <br/>
 	<a href="/registrati">Registrati</a> <br/>
 	{% endif %}
-	
-	
+	{% if gestore %}
+	<a href="/gestione">Gestisci</a> <br/>
+	{% endif %}
 	{% if proiezioni %}
 	<table>
 		<tr>
