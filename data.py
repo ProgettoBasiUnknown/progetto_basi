@@ -60,7 +60,7 @@ metadata.create_all( engine )
 #richiede: nada
 def start_db():
 	conn = engine.connect()
-	#inserimento 4 nuovi utenti iniziali, gli ID 1-2-3 hanno sempre potere di assumere o licenziare utenti e non devono essere licenziati
+	#inserimento 4 nuovi utenti iniziali, i primi 3 hanno sempre potere di assumere o licenziare utenti e non devono essere licenziati (sono i proprietari del cinema)
 	insu = utenti.insert()
 	conn.execute(insu,[
 		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': 875936, 'gestore': True},
@@ -69,7 +69,7 @@ def start_db():
 		{'nome': "Mario",   'cognome': "Rossi",      'email': "mario@stud.it",  	  'password': "mario",  'telefono': 4316,   'gestore': False}
 
 		]) 
-	#inserimento 3 nuovi film
+	#inserimento alcuni film per testare db
 	insf = film.insert()
 	conn.execute(insf,[
 		{'titolo': "filmA", 'durata': 100, 'pubblicazione': 2002, 'regista': "registaA",'genere': "comico",    'availability': True},
@@ -389,39 +389,26 @@ def disabilita_proiezione(k):
 
 #########################################################################################
 
-#SELECT SUM (Prezzo * Quantita) AS 'Totale'
-#FROM Vendite
-#WHERE Giorno ='01/01/2016'
-
-#DEVO RITORNARE LA SOMMA DELLE VENDITE E SOLDI INCASSATI, COME ARRAY DI DIMENSIONE 2
-#s = text(" SELECT * FROM users WHERE id =: user_id ")
-#results = conn.execute(s, user_id =2)
-#azione: restituisce tutti i record di una tabella dello stesso anno, serve per visualizzare le statistiche di vendita
+#azione: restituisce un array con numero di vendite divise per mese e l'incasso annuale, serve per visualizzare le statistiche di vendita
 #richiede: anno(int)
-#def statistiche_vendite_annuali(anno):
-#	first = datetime.datetime(anno,1,1)		
-#	last = datetime.datetime(anno+1,1,1)
-#	conn=engine.connect()
-#	g= text("SELECT SUM vendite FROM proiezioni WHERE dataora>d AND dataora<d")
-#	GEN =conn.execute()
-#	FEB =conn.execute()
-#	MAR =conn.execute()
-#	APR =conn.execute()
-#	MAG =conn.execute()
-#	GIU =conn.execute()
-#	LUG =conn.execute()
-#	AGO =conn.execute()
-#	SET =conn.execute()
-#	OTT =conn.execute()
-#	NOV =conn.execute()
-#	DIC =conn.execute()
-#	conn.close()
-#	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC],[]]
-
-#########################################################################################
-
-#azione:
-#richiede:
+def statistiche_vendite_annuali(anno):
+	conn = engine.connect()
+	GEN = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno,2,1)))).fetchone()[0]
+	FEB = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,2,1), proiezioni.c.dataora < datetime.datetime(anno,3,1)))).fetchone()[0]
+	MAR = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,3,1), proiezioni.c.dataora < datetime.datetime(anno,4,1)))).fetchone()[0]
+	APR = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,4,1), proiezioni.c.dataora < datetime.datetime(anno,5,1)))).fetchone()[0]
+	MAG = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,5,1), proiezioni.c.dataora < datetime.datetime(anno,6,1)))).fetchone()[0]
+	GIU = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,6,1), proiezioni.c.dataora < datetime.datetime(anno,7,1)))).fetchone()[0]
+	LUG = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,7,1), proiezioni.c.dataora < datetime.datetime(anno,8,1)))).fetchone()[0]
+	AGO = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,8,1), proiezioni.c.dataora < datetime.datetime(anno,9,1)))).fetchone()[0]
+	SET = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,9,1), proiezioni.c.dataora < datetime.datetime(anno,10,1)))).fetchone()[0]
+	OTT = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,10,1), proiezioni.c.dataora < datetime.datetime(anno,11,1)))).fetchone()[0]
+	NOV = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,11,1), proiezioni.c.dataora < datetime.datetime(anno,12,1)))).fetchone()[0]
+	DIC = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,12,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
+	avg_price = conn.execute(select([func.avg(proiezioni.c.prezzo)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1),proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
+	incasso = (GEN+FEB+MAR+APR+MAG+GIU+LUG+AGO+SET+OTT+NOV+DIC) * avg_price
+	conn.close()
+	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC],[incasso]]
 
 #########################################################################################
 
