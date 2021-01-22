@@ -133,8 +133,8 @@ def add_film():
 def remove_film():
 	if is_admin(load_user(current_user.get_id())) :
 		id = request.form['id']
-		elimina_film(id)
-		return  render_template('risultato.html' , result = True, link = '/gestisci_film')
+		resultq = elimina_film(id)
+		return  render_template('risultato.html' , result = resultq, link = '/gestisci_film')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -156,8 +156,8 @@ def promote():
 	utente=load_user(current_user.get_id())
 	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3)  ):
 		u=request.form['id']
-		promuovi(int(u))
-		return render_template('risultato.html' , result = True, link = '/autorizzazioni')
+		resultq = promuovi(int(u))
+		return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -168,8 +168,8 @@ def downgrade():
 	utente=load_user(current_user.get_id())
 	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3)  ):
 		u=request.form['id']
-		licenzia(int(u))
-		return render_template('risultato.html' , result = True, link = '/autorizzazioni')
+		resultq = licenzia(int(u))
+		return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
 	else:
 		return redirect('/accedi')
 			#accesso negato	
@@ -205,11 +205,8 @@ def add_projection():
 def close_projection():
 	if is_admin(load_user(current_user.get_id())) :
 		chiave=request.form['chiave']
-		result=disabilita_proiezione(chiave)
-		if result:
-			return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
-		else:
-			return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+		resultquery=disabilita_proiezione(chiave)
+		return render_template("risultato.html", result=resultquery , link="/gestisci_proiezioni")	
 	else:
 		return redirect('/accedi')
 			#accesso negato	
