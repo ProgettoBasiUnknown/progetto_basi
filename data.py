@@ -513,7 +513,7 @@ def durata_film(id):
 #richiede: id film (int)
 def verifica_id_film(id):
 	conn = engine.connect()
-	out = conn.execute(select([film]).where(film.c.CODICE==id)).fetchone()
+	out = conn.execute(select([film]).where(and_(film.c.CODICE==id, film.c.availability==True))).fetchone()
 	if out==None:
 		return True
 	return False
