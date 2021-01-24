@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>Prenota</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body onload="hideBtn()">
+	
+<a href="/prenotabili">Torna indietro</a><br>
+<h1>Prenotazione</h1>
+	<form action="/prenotamento" method="POST">
+	{% if posti %}
+	<table>
+		<tr>
+			<th>Riga</th>
+			<th>Colonna</th>
+			<th>prenota</th>
+		</tr>
+		{% for posto in posti %}
+		<tr>
+			<td>{{posto.1}}</td>
+			<td>{{posto.2}}</td>
+			<td> <input type="checkbox" id={{posto.0}} name="checks" value={{posto.0}} onclick="refresh()"></td>
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	<input type="text" id="post" name="posti" size="40" readonly>
+	<input type="button" onclick="myFunction()" value="Verifica">
+	<input type="submit" id="sub" value="Prenota" visibility="hidden">
+	</form>
+	<script>
+		
+		function hideBtn(){
+			document.getElementById("sub").style.visibility = "hidden";
+		}
+		
+		function refresh(){
+			document.getElementById("sub").style.visibility = "hidden";
+		}
+		
+		
+		function myFunction() {
+		  var checkx = document.forms[0];
+		  var txt = "";
+		  var i;
+		  for (i = 0; i < checkx.length; i++) {
+		    if (checkx[i].checked) {
+		      txt = txt + checkx[i].value + "-"; 
+		    }
+		  }
+		  document.getElementById("post").value = txt;
+	      document.getElementById("sub").style.visibility = "visible";
+		}
+	</script>
+</body>
+</html>

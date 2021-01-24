@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>Prenota</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+	
+<a href="/personale">Torna all'area personale</a><br>
+<a href="/">Torna alla home</a><br>
+<h1>Prenotazione</h1>
+	{%if generi%}
+	Scegli uno dei generi per filtrare i risultati<br> 
+	{%for genere in generi%}
+	<a href=/prenotabili/{{genere.0}} >{{genere.0}}</a>
+	{% endfor%}
+	<br>
+	{% endif %}
+	Inserisci la chiave della proiezione da prenotare
+	<br>
+	<form action="/prenota" method="POST">
+	<input name="chiave" type="number">
+	<input type="submit" value="Mostra i posti disponibili"> 
+	</form>
+	{% if proiezioni %}
+	<table>
+		<tr>
+			<th>ID Proiezioni</th>
+			<th>Film</th>
+			<th>Data</th>
+			<th>Sala</th>
+			<th>Durata</th>
+			<th>Anno Pubblicazionw</th>
+			<th>Regista</th>
+			<th>Genere</th>
+			<th>Prenotabile</th>
+		</tr>
+		{% for proiezione  in proiezioni %}
+		<tr>
+			<td> {{ proiezione.0}} </td>
+			<td> {{ proiezione.8}} </td>
+			<td> {{ proiezione.1 }} </td>
+			<td> {{ proiezione.2 }} </td>
+			<td> {{ proiezione.9 }} </td>
+			<td> {{ proiezione.10 }} </td>
+			<td> {{ proiezione.11 }} </td>
+			<td> {{ proiezione.12 }} </td>
+			<td> {{ proiezione.4 }} </td>
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	
+</body>
+</html>

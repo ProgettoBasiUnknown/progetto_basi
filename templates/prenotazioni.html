@@ -1,0 +1,35 @@
+<html>
+<head>
+<title>Prenotazioni effettuate</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+	
+<a href="/personale">Torna indietro</a><br>
+<h1>Prenotazioni</h1>
+	{% if dati %}
+	<table>
+		<tr>
+			<th>Film</th>
+			<th>Sala</th>
+			<th>Data</th>
+			<th>Posti</th>
+		</tr>
+		{% for dato in dati %}
+		<tr>
+			<td>{{dato.0}}</td>
+			<td>{{dato.1}}</td>
+			<td>{{dato.2}}</td>
+			<td>{{dato.3}}</td>
+			
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+</body>
+</html>

@@ -16,27 +16,31 @@ table, th, td {
 	<form action="/aggiungi_proiezione" method="POST">
 	<label for="ianno">Anno:</label>
 	<br>
-	<input type="text" id="ianno" name="anno" type="number">
+	<input type="number" id="ianno" name="anno" min="2021" max="2030">
 	<br>
 	<label for="imese">Mese:</label>
 	<br>
-	<input type="text" id="imese" name="mese" type="number">
+	<input type="number" id="imese" name="mese" min="1" max="12">
 	<br>
 	<label for="igiorno">Giorno:</label>
 	<br>
-	<input type="text" id="igiorno" name="giorno" type="number">
+	<input type="number" id="igiorno" name="giorno" min="1" max="31">
+	<br>
+	<label for="iora">Ora:</label>
+	<br>
+	<input type="time" id="iora" name="ora">
 	<br>
 	<label for="isala">Sala:</label>
 	<br>
-	<input type="text" id="isala" name="sala"type="number">
+	<input type="number" id="isala" name="sala" min="1" max="7">
 	<br>
 	<label for="ifilm">Id film:</label>
 	<br>
-	<input type="text" id="ifilm" name="film"type="number">
+	<input type="number" id="ifilm" name="film" min="0">
 	<br>
 	<label for="iprezzo">Prezzo Biglietto:</label>
 	<br>
-	<input type="text" id="ibiglietto" name="biglietto"type="number">
+	<input type="number" id="ibiglietto" name="biglietto" min="0">
 	<br>
 	<input type="submit" value="Aggiungi proiezione"> 
 	</form>
@@ -44,12 +48,14 @@ table, th, td {
 	{% if sale %}
 	<table>
 		<tr>
-			<th>ID/numero Sale</th>
+			<th>ID/numero Sala</th>
+			<th>Capienza</th>
 			
 		</tr>
 		{% for sala  in sale %}
 		<tr>
 			<td> {{ sala.0}} </td>
+			<td> {{ sala.1}} </td>
 			
 		</tr>
 		{% endfor %}
@@ -68,8 +74,8 @@ table, th, td {
 		</tr>
 		{% for f  in film %}
 		<tr>
-			<td> {{ f.0}} </td>
-			<td> {{ f.1}} </td>
+			<td> {{ f.0 }} </td>
+			<td> {{ f.1 }} </td>
 			<td> {{ f.2 }} </td>
 			<td> {{ f.3 }} </td>
 			<td> {{ f.4 }} </td>
@@ -83,7 +89,7 @@ table, th, td {
 	
 	
 	<h1>CHIUDI PRENOTAZIONI</h1>
-	Inserisci la chiave della proiezione alla quale interrompere le prenotazioni
+	Inserisci l'ID della proiezione alla quale interrompere le prenotazioni
 	<br>
 	<form action="/chiudi_proiezione" method="POST">
 	<input name="chiave" type="number">

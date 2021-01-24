@@ -1,0 +1,60 @@
+<html>
+<head>
+	<title>Statistiche</title>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	
+</head>
+<body>
+	
+<a href="/personale">Torna all'area personale</a><br>
+<a href="/">Torna alla home</a><br>
+	
+<h1>STATISTICHE</h1>	
+{% if anni_stats %}
+Scegli uno dei seguenti anni per visualizzare il grafico<br> 
+{%for anno in anni_stats%}
+<a href=/statistiche/{{anno}} >{{anno}}</a>
+{% endfor%}
+{% endif %}
+<br>
+	<h1>Stima incasso annuo: </h1>
+	{% if incasso %}
+	<h3> $ {{incasso}} </h3>
+	{% endif %}
+<br>
+<div class="chart-container" style="position: relative; width:80vw; height:40vh">
+	<canvas id="myChart" width="40" height="20"></canvas>
+	
+	<script>
+	//{% if vendite %}
+	var tx = {{ vendite }};
+	//{% endif %}
+	$(document).ready(function(){
+	var ctx = $("#myChart");		
+	var mySweetBubbleChart = new Chart(ctx, {
+		type: 'polarArea',
+		data: { 
+			labels: ["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"],
+			datasets:[{
+				data:tx,
+				backgroundColor: ['rgba(255, 0, 0, 0.8)','rgba(0, 255, 0, 0.8)','rgba(0, 0, 255, 0.8)',
+				'rgba(255, 255, 0, 0.8)','rgba(0, 255, 255, 0.8)','rgba(255, 0, 255, 0.8)',
+				'rgba(0, 160, 0, 0.8)','rgba(0, 0, 160, 0.8)','rgba(255, 225, 0, 0.8)',
+				'rgba(223, 0, 127, 0.8)','rgba(127, 227, 0, 0.8)','rgba(127, 0, 223, 0.8)'],
+				borderWidth: 0.1
+			}]
+		},
+		
+	});
+			
+	
+	});
+
+</script>
+
+</div>
+</body>
+
+</html>
