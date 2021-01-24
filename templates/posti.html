@@ -29,7 +29,8 @@ table, th, td {
 		{% endfor %}
 	</table>
 	{% endif %}
-	<input type="text" id="post" name="posti" size="40" readonly>
+	<input type="text" id="post" name="posti" size="40" readonly><br>
+	<input type="text" id="costo" name="totale" size="40" readonly>
 	<input type="button" onclick="myFunction()" value="Verifica">
 	<input type="submit" id="sub" value="Prenota" visibility="hidden">
 	</form>
@@ -37,10 +38,14 @@ table, th, td {
 		
 		function hideBtn(){
 			document.getElementById("sub").style.visibility = "hidden";
+			document.getElementById("post").style.visibility = "hidden";
+			document.getElementById("costo").style.visibility = "hidden";
 		}
 		
 		function refresh(){
 			document.getElementById("sub").style.visibility = "hidden";
+			document.getElementById("post").style.visibility = "hidden";
+			document.getElementById("costo").style.visibility = "hidden";
 		}
 		
 		
@@ -48,13 +53,20 @@ table, th, td {
 		  var checkx = document.forms[0];
 		  var txt = "";
 		  var i;
+		  var tot=0;
 		  for (i = 0; i < checkx.length; i++) {
 		    if (checkx[i].checked) {
-		      txt = txt + checkx[i].value + "-"; 
+		      txt = txt + checkx[i].value + "-";
+			  tot++;
 		    }
 		  }
+		  if(tot>0){
 		  document.getElementById("post").value = txt;
-	      document.getElementById("sub").style.visibility = "visible";
+		  document.getElementById("costo").value = "Totale: $" + (tot* {{costo}});
+		  document.getElementById("sub").style.visibility = "visible";
+		  document.getElementById("post").style.visibility = "visible";
+		  document.getElementById("costo").style.visibility = "visible";
+		  }
 		}
 	</script>
 </body>

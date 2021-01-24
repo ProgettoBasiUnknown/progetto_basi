@@ -23,7 +23,7 @@ table, th, td {
 	Inserisci la chiave della proiezione da prenotare
 	<br>
 	<form action="/prenota" method="POST">
-	<input name="chiave" type="number">
+	<input name="chiave" type="number" min="0">
 	<input type="submit" value="Mostra i posti disponibili"> 
 	</form>
 	{% if proiezioni %}

@@ -16,23 +16,23 @@ table, th, td {
 	<form action="/aggiungi_film" method="POST">
 	<label for="ititolo">Titolo:</label>
 	<br>
-	<input type="text" id="ititolo" name="titolo" type="text">
+	<input type="text" id="ititolo" name="titolo" required="required">
 	<br>
 	<label for="idurata">Durata:</label>
 	<br>
-	<input type="text" id="idurata" name="durata" type="number">
+	<input type="number" id="idurata" name="durata" min=60 max=240 required="required">
 	<br>
 	<label for="ipubblicazione">Anno pubblicazione:</label>
 	<br>
-	<input type="text" id="ipubblicazione" name="pubblicazione" type="number">
+	<input type="number" id="ipubblicazione" name="pubblicazione" min=1950 max={{annocorrente}} required="required">
 	<br>
 	<label for="iregista">Regista:</label>
 	<br>
-	<input type="text" id="iregista" name="regista"type="text">
+	<input type="text" id="iregista" name="regista" required="required">
 	<br>
 	<label for="igenere">Genere:</label>
 	<br>
-	<input type="text" id="igenere" name="genere"type="text">
+	<input type="text" id="igenere" name="genere" required="required">
 	<br>
 	<input type="submit" value="Aggiungi film"> 
 	</form>
