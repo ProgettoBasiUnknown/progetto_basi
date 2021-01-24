@@ -62,7 +62,7 @@ def admin_required(f):
 
 @app.route('/') #home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, le opzioni per loggarsi, registrarsi, consultare programmazione e dati personali
 def home():		
-	proiezioni_vicine = richiesta_tabella_proiezioni(False)[:4]
+	proiezioni_vicine = richiesta_tabella_proiezioni(True)[:4]
 	if current_user.is_authenticated :#controlla se si è già loggati
 		u=load_user(current_user.get_id())
 		if is_admin(u):
@@ -74,7 +74,7 @@ def home():
 		
 @app.route('/programmazione') #mostra tutte le proiezioni in programma
 def programmazione():
-		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni(False))
+		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni(True))
 
 @app.route('/accedi')	##pagina per fare il login
 def access():
@@ -139,7 +139,7 @@ def gestore():
 @login_required
 @gestore_required
 def film_managing():
-	return render_template('gestione_films.html', films = richiesta_tabella_film(True))##ANCORA DA SISTEMARE!!!!!!!!!!!
+	return render_template('gestione_films.html', films = richiesta_tabella_film(True), annocorrente = datetime.datetime.now().year)##ANCORA DA SISTEMARE!!!!!!!!!!!
 	
 
 @app.route('/aggiungi_film', methods =[ "POST"]) ##riceverà le informazioni sul film da aggiungere e le trasmetterà al db, restituirà un html col risultato dell'operazione
@@ -198,7 +198,7 @@ def downgrade():
 @login_required
 @gestore_required
 def manage_projection():
-	return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni(True) , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
+	return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni(False) , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
 	
 		
 @app.route('/aggiungi_proiezione' , methods =[ "POST"]) ##elabora la richiesta di aggiungere una nuova proiezione da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
@@ -267,7 +267,7 @@ def prenotazioni():
 @app.route('/prenotabili') ##mostra tutte le proiezioni prenotabili e dà un form per effettuare una prenotazione
 @login_required
 def prenotabili():
-	return render_template('scelta_proiezione.html', proiezioni = richiesta_tabella_proiezioni(False), generi=richiesta_generi_disponibili())
+	return render_template('scelta_proiezione.html', proiezioni = richiesta_tabella_proiezioni(True), generi=richiesta_generi_disponibili())
 
 @app.route('/prenotabili/<genere>')
 @login_required
@@ -275,22 +275,26 @@ def prenotabili_genere(genere):
 	return render_template('scelta_proiezione.html', proiezioni = richiesta_tabella_proiezioni_genere(genere), generi=richiesta_generi_disponibili())
 	
 
-@app.route('/prenota', methods =[ "POST"]) ##elabora la prenotazione, restituirà un html col risultato dell'operazione
+@app.route('/prenota', methods =[ "POST" ]) ##elabora la prenotazione, restituirà un html col risultato dell'operazione
 @login_required
 def prenota():
 	chiave=request.form['chiave']
-	occupati = array_posti_prenotati(chiave)
-	posti = array_posti_sala(chiave)
-	disponibili=[]
-	if posti != None:
-		for posto in posti:
-			if not(posto[0] in occupati):
-				disponibili.append(posto)
-		quantità=list(range(0,len(disponibili)))
-	session['proiezione']=chiave
-	return render_template('posti.html', posti=disponibili)
+	costo_biglietto = informazioni_proiezione(chiave)
+	if (costo_biglietto >= 0):
+		occupati = array_posti_prenotati(chiave)
+		posti = array_posti_sala(chiave)
+		disponibili=[]
+		if posti != None:
+			for posto in posti:
+				if not(posto[0] in occupati):
+					disponibili.append(posto)
+			quantità=list(range(0,len(disponibili)))
+		session['proiezione']=chiave
+		return render_template('posti.html', posti=disponibili, costo = costo_biglietto)
+	else:
+		return render_template("risultato.html", result=False , link='/prenotabili', msg="Proiezione non disponibile")
 
-@app.route('/prenotamento', methods =[ "POST"])
+@app.route('/prenotamento', methods =[ "POST" ])
 @login_required
 def prenotamento():
 	if ('proiezione' in session) and (request.method == 'POST'):

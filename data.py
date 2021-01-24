@@ -141,6 +141,12 @@ def start_db():
 	inserimento_proiezione(datetime.datetime(2020, 7, 1), 2, 1, 8)
 	inserimento_proiezione(datetime.datetime(2020, 8, 2), 4, 4, 10)#orario, salaID, filmID, prezzo
 	inserimento_proiezione(datetime.datetime(2020, 9, 5), 1, 2, 9)
+	
+	inserisci_prenotazione("7-8-", 3, 4, 2)
+	inserisci_prenotazione("9-", 3, 4, 1)
+	inserisci_prenotazione("10-", 3, 4, 1)
+	inserisci_prenotazione("11-12-13-", 3, 4, 3)
+	inserisci_prenotazione("7-8-9-10-11", 4, 2, 5)#posti, proiezione, cliente, num_posti
 
 	#esempiio prenotazione: inserisci_prenotazione("7-8-9-", 4, 2, 5) posti, proiezione, cliente, num_posti
 
@@ -289,19 +295,20 @@ def richiesta_tabella_utenti():
 #richiede: condizione(boolean)
 def richiesta_tabella_proiezioni(condizione):
 	conn = engine.connect()
+	tran = conn.begin()
+	try:
+		ora_aggiornamento = datetime.datetime.now() + datetime.timedelta(minutes = 5)
+		print(ora_aggiornamento)
+		conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.dataora <= ora_aggiornamento))#chiudo automaticamente le proiezioni dei film che inizieranno fra 5 min
+		tran.commit()
+	except:
+		tran.rollback()
+		conn.close()
+		raise
 	if condizione:
-		tran = conn.begin()
-		try:
-			ora_aggiornamento = datetime.datetime.now() + datetime.timedelta(minutes = 5)
-			conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.dataora <= ora_aggiornamento))#chiudo automaticamente le proiezioni dei film che inizieranno fra 5 min
-			tran.commit()
-			out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()
-		except:
-			tran.rollback
-			conn.close()
-			raise
+		out = conn.execute(select([proiezioni, film]).where(and_(proiezioni.c.film == film.c.CODICE , proiezioni.c.availability == True)).order_by('dataora')).fetchall()
 	else:
-		out = conn.execute(select([proiezioni, film]).where(and_(proiezioni.c.film == film.c.CODICE , proiezioni.c.availability == True)).order_by('dataora')).fetchall()		
+		out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()	
 	conn.close()
 	return out
 
@@ -398,22 +405,43 @@ def disabilita_proiezione(k):
 #richiede: anno(int)
 def statistiche_vendite_annuali(anno):
 	conn = engine.connect()
-	GEN = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno,2,1)))).fetchone()[0])
-	FEB = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,2,1), proiezioni.c.dataora < datetime.datetime(anno,3,1)))).fetchone()[0])
-	MAR = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,3,1), proiezioni.c.dataora < datetime.datetime(anno,4,1)))).fetchone()[0])
-	APR	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,4,1), proiezioni.c.dataora < datetime.datetime(anno,5,1)))).fetchone()[0])
-	MAG	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,5,1), proiezioni.c.dataora < datetime.datetime(anno,6,1)))).fetchone()[0])
-	GIU	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,6,1), proiezioni.c.dataora < datetime.datetime(anno,7,1)))).fetchone()[0])
-	LUG	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,7,1), proiezioni.c.dataora < datetime.datetime(anno,8,1)))).fetchone()[0])
-	AGO	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,8,1), proiezioni.c.dataora < datetime.datetime(anno,9,1)))).fetchone()[0])
-	SET	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,9,1), proiezioni.c.dataora < datetime.datetime(anno,10,1)))).fetchone()[0])
-	OTT	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,10,1), proiezioni.c.dataora < datetime.datetime(anno,11,1)))).fetchone()[0])
-	NOV	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,11,1), proiezioni.c.dataora < datetime.datetime(anno,12,1)))).fetchone()[0])
-	DIC = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,12,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0])
+	v=[]
+	GEN = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno,2,1)))).fetchone()[0]
+	v.append(GEN)
+	FEB = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,2,1), proiezioni.c.dataora < datetime.datetime(anno,3,1)))).fetchone()[0]
+	v.append(FEB)
+	MAR = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,3,1), proiezioni.c.dataora < datetime.datetime(anno,4,1)))).fetchone()[0]
+	v.append(MAR)
+	APR	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,4,1), proiezioni.c.dataora < datetime.datetime(anno,5,1)))).fetchone()[0]
+	v.append(APR)
+	MAG	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,5,1), proiezioni.c.dataora < datetime.datetime(anno,6,1)))).fetchone()[0]
+	v.append(MAG)
+	GIU	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,6,1), proiezioni.c.dataora < datetime.datetime(anno,7,1)))).fetchone()[0]
+	v.append(GIU)
+	LUG	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,7,1), proiezioni.c.dataora < datetime.datetime(anno,8,1)))).fetchone()[0]
+	v.append(LUG)
+	AGO	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,8,1), proiezioni.c.dataora < datetime.datetime(anno,9,1)))).fetchone()[0]
+	v.append(AGO)
+	SET	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,9,1), proiezioni.c.dataora < datetime.datetime(anno,10,1)))).fetchone()[0]
+	v.append(SET)
+	OTT	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,10,1), proiezioni.c.dataora < datetime.datetime(anno,11,1)))).fetchone()[0]
+	v.append(OTT)
+	NOV	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,11,1), proiezioni.c.dataora < datetime.datetime(anno,12,1)))).fetchone()[0]
+	v.append(NOV)
+	DIC = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,12,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
+	v.append(DIC)
 	avg_price = conn.execute(select([func.avg(proiezioni.c.prezzo)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
-	incasso = (GEN+FEB+MAR+APR+MAG+GIU+LUG+AGO+SET+OTT+NOV+DIC) * avg_price
+	years=[]
+	tot = 0
+	for a in v:
+		if a == None:
+			years.append(0)
+		else:
+			years.append(int(a))
+			tot += int(a)
+	incasso = (tot) * avg_price
 	conn.close()
-	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC], incasso]
+	return [years, incasso]
 
 #########################################################################################
 
@@ -423,9 +451,11 @@ def anni_statistiche():
 	conn = engine.connect()
 	out = conn.execute(select([proiezioni.c.dataora]).distinct()).fetchall()
 	years=[]
-	for a in out[0]:
-		years.append(a.year)
+	for a in out:
+		years.append(a[0].year)
+	print("FFFFFFFFFFFF  ",years)
 	o = list(set(years))
+	print("AAAAAAA ", o)
 	return o
 
 #########################################################################################
@@ -491,7 +521,7 @@ def richiesta_tabella_proiezioni_genere(genere):
 def controlla_proiezione(ora, salaa, durata):
 	conn = engine.connect()
 	dopo = ora + datetime.timedelta(minutes = durata)
-	out = conn.execute(select([proiezioni]).where(and_(proiezioni.c.dataora >= ora, proiezioni.c.dataora <= dopo, proiezioni.c.sala == salaa))).fetchone()
+	out = conn.execute(select([proiezioni]).where(and_(proiezioni.c.dataora >= (ora - datetime.timedelta(minutes = durata)), proiezioni.c.dataora <= dopo, proiezioni.c.sala == salaa))).fetchone()
 	if( out == None):
 		return False
 	else:
@@ -518,6 +548,19 @@ def verifica_id_film(id):
 		return True
 	return False
 	
+#########################################################################################
+
+#azione: verifica la presenza del film avente id='id' nel database
+#richiede: id proiezione(int)
+def informazioni_proiezione(id):
+	conn = engine.connect()
+	out = conn.execute(select([proiezioni.c.prezzo]).where(and_(proiezioni.c.ETICHETTA == id, proiezioni.c.availability == True))).fetchone()
+	conn.close()
+	if out == None:
+		return -1
+	else:
+		return out[0]
+
 #########################################################################################
 
 
