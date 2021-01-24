@@ -36,14 +36,14 @@ table, th, td {
 	Inserisci l'id dell'utente da promuovere a gestore
 	<br>
 	<form action="/promuovi" method="POST">
-	<input name="id" type="number">
+	<input name="id" type="number" min="4">
 	<input type="submit" value="Promuovi"> 
 	</form>
 	<h1>Licenzia utente</h1>
 	Inserisci l'id dell'utente da rimuovere dai gestori
 	<br>
 	<form action="/declassa" method="POST">
-	<input name="id" type="number">
+	<input name="id" type="number" min="4">
 	<input type="submit" value="Licenzia"> 
 	</form>
 </body>

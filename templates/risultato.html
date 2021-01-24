@@ -8,5 +8,9 @@
 	{% else %}
 	Operazione non riuscita <br>
 	{% endif %}
+	
+	{%if msg%}
+	<h3>{{msg}}</h3><br>
+	{% endif%}
 	<a href={{link}}>continua</a>
 <html>
