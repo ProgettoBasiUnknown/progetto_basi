@@ -432,7 +432,6 @@ def statistiche_vendite_annuali(anno):
 	incasso = (GEN+FEB+MAR+APR+MAG+GIU+LUG+AGO+SET+OTT+NOV+DIC) * avg_price
 	#mettere tutttappostooo
 	conn.close()
-	print([GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC])
 	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC], incasso]
 
 #########################################################################################
@@ -466,7 +465,6 @@ def array_posti_prenotati(etichetta):
 		return out
 	for a in lista:
 		out.append(int(a))
-	print(out)	
 	return out #posti non dispobili
 
 #########################################################################################
