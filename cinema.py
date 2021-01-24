@@ -62,7 +62,7 @@ def admin_required(f):
 
 @app.route('/') #home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, le opzioni per loggarsi, registrarsi, consultare programmazione e dati personali
 def home():		
-	proiezioni_vicine=richiesta_tabella_proiezioni(True)[:4]
+	proiezioni_vicine = richiesta_tabella_proiezioni(False)[:4]
 	if current_user.is_authenticated :#controlla se si è già loggati
 		u=load_user(current_user.get_id())
 		if is_admin(u):
@@ -74,7 +74,7 @@ def home():
 		
 @app.route('/programmazione') #mostra tutte le proiezioni in programma
 def programmazione():
-		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni(True))
+		return render_template("programmazione.html", proiezioni = richiesta_tabella_proiezioni(False))
 
 @app.route('/accedi')	##pagina per fare il login
 def access():

@@ -3,9 +3,7 @@ import sqlalchemy
 import os.path
 from sqlalchemy import *
 
-
-#engine = create_engine('sqlite:///file.db', echo = True)
-metadata = MetaData() #da finire bene quando si fanno i vari file-moduli
+metadata = MetaData() 
 engine = create_engine( 'mysql+mysqldb://utente:database@localhost/cinema', echo=True )
 #########################################################################################
 
@@ -66,7 +64,6 @@ def start_db():
 		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': "875936", 'gestore': True},
 		{'nome': "Lorenzo", 'cognome': "Piva",       'email': "873775@stud.unive.it", 'password': "873775", 'telefono': "873775", 'gestore': True}, 
 		{'nome': "Radu",    'cognome': "Novac",      'email': "857630@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True},
-		{'nome': "Antonio", 'cognome': "Ciccio",     'email': "857631@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True},
 		{'nome': "Mario",   'cognome': "Rossi",      'email': "mario@stud.it",  	  'password': "mario",  'telefono': "4316",   'gestore': False}
 
 		]) 
@@ -92,20 +89,20 @@ def start_db():
 	#inserimento di quantità di posti a sedere diverso per ogni sala, questo numero rimarrà invariato, l'ID è incrementale-automatico
 	inspo = posti.insert()
 	conn.execute(inspo,[
-		{'riga': 1, 'colonna': 1, 'sala': 1},#1
+		{'riga': 1, 'colonna': 1, 'sala': 1},
 		{'riga': 1, 'colonna': 2, 'sala': 1},
 		{'riga': 1, 'colonna': 3, 'sala': 1},
 		{'riga': 2, 'colonna': 1, 'sala': 1},
 		{'riga': 2, 'colonna': 2, 'sala': 1},
 		{'riga': 2, 'colonna': 3, 'sala': 1},
-		{'riga': 1, 'colonna': 1, 'sala': 2},#7
-		{'riga': 1, 'colonna': 2, 'sala': 2},#8
+		{'riga': 1, 'colonna': 1, 'sala': 2},
+		{'riga': 1, 'colonna': 2, 'sala': 2},
 		{'riga': 1, 'colonna': 3, 'sala': 2},
 		{'riga': 1, 'colonna': 4, 'sala': 2},
 		{'riga': 2, 'colonna': 1, 'sala': 2},
 		{'riga': 2, 'colonna': 2, 'sala': 2},
 		{'riga': 2, 'colonna': 3, 'sala': 2},
-		{'riga': 2, 'colonna': 4, 'sala': 2},	#14	
+		{'riga': 2, 'colonna': 4, 'sala': 2},
 		{'riga': 1, 'colonna': 1, 'sala': 3},	
 		{'riga': 1, 'colonna': 2, 'sala': 3},	
 		{'riga': 2, 'colonna': 1, 'sala': 3},	
@@ -133,34 +130,20 @@ def start_db():
 		{'riga': 2, 'colonna': 1, 'sala': 7},
 		{'riga': 2, 'colonna': 2, 'sala': 7}])
 			
-	inserimento_proiezione(datetime.datetime(2020,10,3),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,5,13),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,11,23),4,2,7)##
-	inserimento_proiezione(datetime.datetime(2020,12,8),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,6,18),4,2,7)
-	inserimento_proiezione(datetime.datetime(2020,12,14),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,2,6),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,2,7),4,2,7)
-	inserimento_proiezione(datetime.datetime(2020,1,2),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,2,1),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,3,1),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,4,1),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,5,1),4,2,6)
-	inserimento_proiezione(datetime.datetime(2020,6,1),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020, 12, 8),4, 2, 6)
+	inserimento_proiezione(datetime.datetime(2021, 6, 18),4, 2, 7)
+	inserimento_proiezione(datetime.datetime(2020, 12,14),4, 2, 6)
+	inserimento_proiezione(datetime.datetime(2021, 2, 6), 4, 2, 6)
+	inserimento_proiezione(datetime.datetime(2021, 2, 7), 1, 5, 7)
+	inserimento_proiezione(datetime.datetime(2021, 1, 2), 2, 1, 6)
+	inserimento_proiezione(datetime.datetime(2021, 2, 1), 3, 2, 6)
+	inserimento_proiezione(datetime.datetime(2021, 3, 1), 4, 3, 6)
 	inserimento_proiezione(datetime.datetime(2020, 7, 1), 2, 1, 8)
 	inserimento_proiezione(datetime.datetime(2020, 8, 2), 4, 4, 10)#orario, salaID, filmID, prezzo
 	inserimento_proiezione(datetime.datetime(2020, 9, 5), 1, 2, 9)
 
-	inserisci_prenotazione("7-8-", 3, 4, 2)
-	inserisci_prenotazione("9-", 3, 4, 1)
-	inserisci_prenotazione("10-", 3, 4, 1)
-	inserisci_prenotazione("11-12-13-", 3, 4, 3)
-	inserisci_prenotazione("7-8-9-10-11", 4, 2, 5)#posti, proiezione, cliente, num_posti
-	#inserimento di alcune proiezioni in programma che verranno aggiunte ed eleminate con le nuove pellicole appena uscite
-	#inspr = proiezioni.insert()
-	#conn.execute(inspr,[])
-	#inspro = prenotazioni.insert()
-	#conn.execute(inspro,[])
+	#esempiio prenotazione: inserisci_prenotazione("7-8-9-", 4, 2, 5) posti, proiezione, cliente, num_posti
+
 	conn.close()
 	
 #########################################################################################
@@ -222,15 +205,6 @@ def elimina_film(id):
 		return False
 
 #########################################################################################
-#
-#azione: eliminazione totale di una entry nella tabella utenti tramite ID, operazione fatta dall'utente stesso che vuole cancellare i propri dati del db
-#richiede: ID(int)
-#def elimina_utente(id):
-#	conn=engine.connect()
-#	conn.execute(utenti.delete().where(utenti.c.ID==id))
-#	conn.close()
-#
-#########################################################################################
 
 #azione: prelevare tutti i dati di un utente e ne restituisce un "dizionario"
 #richiede: ID(int)
@@ -267,8 +241,6 @@ def promuovi(id):
 #azione: declassa un gestore a semplice utente, operazione per soli admin, i numeri <4 saranno ignorati per sicurezza del db
 #richiede: ID(int)
 def licenzia(id):
-	##aggiungere transazione
-	
 	if (id>3):
 		conn = engine.connect()
 		check =  conn.execute(select([utenti]).where(utenti.c.ID == id)).fetchone()
@@ -300,6 +272,7 @@ def inserisci_prenotazione(posti, proiezione, cliente, num_posti):
 		conn.execute(proiezioni.update().values(vendite = new_vendite).where(proiezioni.c.ETICHETTA == proiezione))
 	conn.close()
 	return True
+
 #########################################################################################
 
 #azione: restituire tutta la tabella utenti (tranne i primi 3) e serve per visualizzare chi poter promuovere o licenziare
@@ -317,7 +290,16 @@ def richiesta_tabella_utenti():
 def richiesta_tabella_proiezioni(condizione):
 	conn = engine.connect()
 	if condizione:
-		out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()
+		tran = conn.begin()
+		try:
+			ora_aggiornamento = datetime.datetime.now() + datetime.timedelta(minutes = 5)
+			conn.execute(proiezioni.update().values(availability = False).where(proiezioni.c.dataora <= ora_aggiornamento))#chiudo automaticamente le proiezioni dei film che inizieranno fra 5 min
+			tran.commit()
+			out = conn.execute(select([proiezioni, film]).where(proiezioni.c.film == film.c.CODICE).order_by('dataora')).fetchall()
+		except:
+			tran.rollback
+			conn.close()
+			raise
 	else:
 		out = conn.execute(select([proiezioni, film]).where(and_(proiezioni.c.film == film.c.CODICE , proiezioni.c.availability == True)).order_by('dataora')).fetchall()		
 	conn.close()
@@ -430,7 +412,6 @@ def statistiche_vendite_annuali(anno):
 	DIC = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,12,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0])
 	avg_price = conn.execute(select([func.avg(proiezioni.c.prezzo)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
 	incasso = (GEN+FEB+MAR+APR+MAG+GIU+LUG+AGO+SET+OTT+NOV+DIC) * avg_price
-	#mettere tutttappostooo
 	conn.close()
 	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC], incasso]
 
@@ -477,10 +458,6 @@ def array_posti_sala(etichetta):
 	salaN = conn.execute(select([proiezioni.c.sala]).where(proiezioni.c.ETICHETTA==etichetta)).fetchone()[0]
 	posti_proiezione = conn.execute(select([posti]).where(posti.c.sala==salaN)).fetchall()
 	#adesso devo ritornare la lista di tutti i posti della sala dopo la query
-	#tutti_posti = ""
-	#for a in posti_proiezione:
-	#	tutti_posti=tutti_posti+a[0]+"-"
-	#out = tutti_posti.split("-").sort()
 	out=[]
 	for posto in posti_proiezione:
 		out.append(posto)
@@ -545,6 +522,4 @@ def verifica_id_film(id):
 
 
 
-
 #start_db()
-
