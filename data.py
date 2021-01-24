@@ -4,18 +4,18 @@ import os.path
 from sqlalchemy import *
 
 
-engine = create_engine('sqlite:///file.db', echo = True)
+#engine = create_engine('sqlite:///file.db', echo = True)
 metadata = MetaData() #da finire bene quando si fanno i vari file-moduli
-
+engine = create_engine( 'mysql+mysqldb://utente:database@localhost/cinema', echo=True )
 #########################################################################################
 
 utenti = Table('utenti', metadata,
 	Column('ID', Integer, primary_key=True),
-	Column('nome', String),
-	Column('cognome', String),
-	Column('email', String),
-	Column('password', String),
-	Column('telefono', String),
+	Column('nome', String(30), nullable = False),
+	Column('cognome', String(30), nullable = False),
+	Column('email', String(30), nullable = False, unique = True),
+	Column('password', String(30), nullable = False),
+	Column('telefono', String(30), nullable = False),
 	Column('gestore', Boolean))
 
 posti = Table('posti', metadata,
@@ -26,16 +26,16 @@ posti = Table('posti', metadata,
 
 film = Table('film', metadata,
 	Column('CODICE', Integer, primary_key=True),
-	Column('titolo', String),
-	Column('durata', Integer),
-	Column('pubblicazione', Integer),
-	Column('regista', String),
-	Column('genere', String),
+	Column('titolo', String(30), nullable = False),
+	Column('durata', Integer, nullable = False),
+	Column('pubblicazione', Integer, nullable = False),
+	Column('regista', String(30)),
+	Column('genere', String(30)),
 	Column('availability', Boolean))
 
 prenotazioni = Table('prenotazioni', metadata,
 	Column('NUMERO', Integer, primary_key=True),
-	Column('posti_prenotati', String), #ForeignKey('posti.ID') è una stringa di tutti gli ID dei posti prenotati, con parser. es: 20-21-21 sono 3 posti prenotati nella sala 4
+	Column('posti_prenotati', String(30)), #ForeignKey('posti.ID') è una stringa di tutti gli ID dei posti prenotati, con parser. es: 20-21-21 sono 3 posti prenotati nella sala 4
 	Column('proiezione', Integer, ForeignKey('proiezioni.ETICHETTA')),
 	Column('cliente', Integer, ForeignKey('utenti.ID')))
 
@@ -45,12 +45,12 @@ proiezioni = Table('proiezioni', metadata,
 	Column('sala', Integer, ForeignKey('sale.SALA')),
 	Column('film', Integer, ForeignKey('film.CODICE')),
 	Column('availability', Boolean),
-	Column('prezzo', Integer),
+	Column('prezzo', Integer, nullable = False),
 	Column('vendite', Integer))
 
 sale = Table('sale', metadata,
 	Column('SALA', Integer, primary_key=True),
-	Column('capienza', Integer))
+	Column('capienza', Integer, nullable = False))
 
 metadata.create_all( engine )
 
@@ -65,7 +65,8 @@ def start_db():
 	conn.execute(insu,[
 		{'nome': "Luca",    'cognome': "Simonaggio", 'email': "875936@stud.unive.it", 'password': "875936", 'telefono': "875936", 'gestore': True},
 		{'nome': "Lorenzo", 'cognome': "Piva",       'email': "873775@stud.unive.it", 'password': "873775", 'telefono': "873775", 'gestore': True}, 
-		{'nome': "Radu",    'cognome': "Novac",      'email': "857630@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True}, 
+		{'nome': "Radu",    'cognome': "Novac",      'email': "857630@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True},
+		{'nome': "Antonio", 'cognome': "Ciccio",     'email': "857631@stud.unive.it", 'password': "857630", 'telefono': "857630", 'gestore': True},
 		{'nome': "Mario",   'cognome': "Rossi",      'email': "mario@stud.it",  	  'password': "mario",  'telefono': "4316",   'gestore': False}
 
 		]) 
@@ -91,20 +92,20 @@ def start_db():
 	#inserimento di quantità di posti a sedere diverso per ogni sala, questo numero rimarrà invariato, l'ID è incrementale-automatico
 	inspo = posti.insert()
 	conn.execute(inspo,[
-		{'riga': 1, 'colonna': 1, 'sala': 1},
+		{'riga': 1, 'colonna': 1, 'sala': 1},#1
 		{'riga': 1, 'colonna': 2, 'sala': 1},
 		{'riga': 1, 'colonna': 3, 'sala': 1},
 		{'riga': 2, 'colonna': 1, 'sala': 1},
 		{'riga': 2, 'colonna': 2, 'sala': 1},
 		{'riga': 2, 'colonna': 3, 'sala': 1},
-		{'riga': 1, 'colonna': 1, 'sala': 2},
-		{'riga': 1, 'colonna': 2, 'sala': 2},
+		{'riga': 1, 'colonna': 1, 'sala': 2},#7
+		{'riga': 1, 'colonna': 2, 'sala': 2},#8
 		{'riga': 1, 'colonna': 3, 'sala': 2},
 		{'riga': 1, 'colonna': 4, 'sala': 2},
 		{'riga': 2, 'colonna': 1, 'sala': 2},
 		{'riga': 2, 'colonna': 2, 'sala': 2},
 		{'riga': 2, 'colonna': 3, 'sala': 2},
-		{'riga': 2, 'colonna': 4, 'sala': 2},		
+		{'riga': 2, 'colonna': 4, 'sala': 2},	#14	
 		{'riga': 1, 'colonna': 1, 'sala': 3},	
 		{'riga': 1, 'colonna': 2, 'sala': 3},	
 		{'riga': 2, 'colonna': 1, 'sala': 3},	
@@ -131,13 +132,37 @@ def start_db():
 		{'riga': 1, 'colonna': 2, 'sala': 7},
 		{'riga': 2, 'colonna': 1, 'sala': 7},
 		{'riga': 2, 'colonna': 2, 'sala': 7}])
+			
+	inserimento_proiezione(datetime.datetime(2020,10,3),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,5,13),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,11,23),4,2,7)##
+	inserimento_proiezione(datetime.datetime(2020,12,8),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,6,18),4,2,7)
+	inserimento_proiezione(datetime.datetime(2020,12,14),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,2,6),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,2,7),4,2,7)
+	inserimento_proiezione(datetime.datetime(2020,1,2),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,2,1),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,3,1),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,4,1),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,5,1),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020,6,1),4,2,6)
+	inserimento_proiezione(datetime.datetime(2020, 7, 1), 2, 1, 8)
+	inserimento_proiezione(datetime.datetime(2020, 8, 2), 4, 4, 10)#orario, salaID, filmID, prezzo
+	inserimento_proiezione(datetime.datetime(2020, 9, 5), 1, 2, 9)
+
+	inserisci_prenotazione("7-8-", 3, 4, 2)
+	inserisci_prenotazione("9-", 3, 4, 1)
+	inserisci_prenotazione("10-", 3, 4, 1)
+	inserisci_prenotazione("11-12-13-", 3, 4, 3)
+	inserisci_prenotazione("7-8-9-10-11", 4, 2, 5)#posti, proiezione, cliente, num_posti
 	#inserimento di alcune proiezioni in programma che verranno aggiunte ed eleminate con le nuove pellicole appena uscite
 	#inspr = proiezioni.insert()
 	#conn.execute(inspr,[])
 	#inspro = prenotazioni.insert()
 	#conn.execute(inspro,[])
 	conn.close()
-
+	
 #########################################################################################
 
 #azione: inserimento di un nuovo film nel db
@@ -160,7 +185,7 @@ def inserimento_utente(nome, cognome, mail, password, tel):
 	conn=engine.connect()
 	conn.execute(utenti.insert(),
 		[{'nome':nome, 'cognome':cognome, 'email':mail, 'password': password, 'telefono': tel, 'gestore': False}])
-	user = conn.execute(select([utenti]).where(utenti.c.mail==mail)).first()
+	user = conn.execute(select([utenti]).where(utenti.c.email==mail)).first()
 	conn.close()
 	return user
 	
@@ -180,8 +205,21 @@ def inserimento_proiezione(orario, salaID, filmID, prezzo):
 #richiede: ID(int)
 def elimina_film(id): 
 	conn=engine.connect()
-	conn.execute(film.update().values(availability = False).where(film.c.CODICE == id))
-	conn.close()
+	check = conn.execute(select([film]).where(film.c.CODICE ==id)).fetchone()
+	if check != None:#controllo se il film è registrato
+		tran = conn.begin()#inizio transazione
+		try:
+			conn.execute(film.update().values(availability = False).where(film.c.CODICE == id))
+			tran.commit()
+			conn.close()
+			return True
+		except:
+			tran.rollback()
+			conn.close()
+			raise
+		return False
+	else:
+		return False
 
 #########################################################################################
 #
@@ -209,19 +247,45 @@ def richiesta_utente(id):
 def promuovi(id):
 	if (id>3):
 		conn = engine.connect()
-		conn.execute(utenti.update().values(gestore = True).where(utenti.c.ID == id))
-		conn.close()
-
+		check =  conn.execute(select([utenti]).where(utenti.c.ID == id)).fetchone()
+		if  check != None:#verifico l'esistenza dell'utente
+			tran = conn.begin() ##inizio la transazione
+			try:
+				conn.execute(utenti.update().values(gestore = True).where(utenti.c.ID == id))
+				tran.commit()
+				conn.close()
+				return True
+			except:
+				tran.rollback()
+				conn.close()
+				raise
+			return False
+		else:
+			return False
 #########################################################################################
 
 #azione: declassa un gestore a semplice utente, operazione per soli admin, i numeri <4 saranno ignorati per sicurezza del db
 #richiede: ID(int)
 def licenzia(id):
+	##aggiungere transazione
+	
 	if (id>3):
 		conn = engine.connect()
-		conn.execute(utenti.update().values(gestore = False).where(utenti.c.ID == id))
-		conn.close()
-
+		check =  conn.execute(select([utenti]).where(utenti.c.ID == id)).fetchone()
+		if  check != None: #verifico l'esistenza dell'utente
+			tran = conn.begin()#inizio transazione
+			try:
+				conn.execute(utenti.update().values(gestore = False).where(utenti.c.ID == id))
+				tran.commit()
+				conn.close()
+				return True
+			except:
+				tran.rollback()
+				conn.close()
+				raise
+			return False
+		else:
+			return False
 #########################################################################################
 
 #azione: aggiungere prenotazione
@@ -230,11 +294,12 @@ def inserisci_prenotazione(posti, proiezione, cliente, num_posti):
 	conn = engine.connect()
 	conn.execute(prenotazioni.insert(),
 		[{'posti_prenotati': posti, 'proiezione': proiezione, 'cliente': cliente}])
-	vd = conn.execute(select([proiezioni.c.vendite]).where(proiezioni.c.ETICHETTA == proiezione)).fetchone()[0]
-	new_vendite = num_posti + vd
-	conn.execute(proiezioni.update().values(vendite = new_vendite).where(proiezioni.c.ETICHETTA == proiezione))
+	vd = conn.execute(select([proiezioni.c.vendite]).where(proiezioni.c.ETICHETTA == proiezione)).fetchone()
+	if vd != None:
+		new_vendite = num_posti + vd[0]
+		conn.execute(proiezioni.update().values(vendite = new_vendite).where(proiezioni.c.ETICHETTA == proiezione))
 	conn.close()
-
+	return True
 #########################################################################################
 
 #azione: restituire tutta la tabella utenti (tranne i primi 3) e serve per visualizzare chi poter promuovere o licenziare
@@ -260,11 +325,11 @@ def richiesta_tabella_proiezioni(condizione):
 
 #########################################################################################
 
-#azione: lista con tutte le prenotazioni di un cliente
+#azione: lista con dati utili riguardanti tutte le prenotazioni di un cliente
 #richiede: ID(int)
 def richiesta_prenotazioni_utente(id):
 	conn = engine.connect()
-	out = conn.execute(select([prenotazioni]).where(prenotazioni.c.cliente == id)).fetchall()
+	out = conn.execute(select([film.c.titolo,proiezioni.c.sala,proiezioni.c.dataora,prenotazioni.c.posti_prenotati]).where(and_(prenotazioni.c.cliente == id, proiezioni.c.film == film.c.CODICE, proiezioni.c.ETICHETTA==prenotazioni.c.proiezione)).order_by('dataora')).fetchall()
 	conn.close()
 	return out
 
@@ -351,22 +416,37 @@ def disabilita_proiezione(k):
 #richiede: anno(int)
 def statistiche_vendite_annuali(anno):
 	conn = engine.connect()
-	GEN = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno,2,1)))).fetchone()[0]
-	FEB = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,2,1), proiezioni.c.dataora < datetime.datetime(anno,3,1)))).fetchone()[0]
-	MAR = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,3,1), proiezioni.c.dataora < datetime.datetime(anno,4,1)))).fetchone()[0]
-	APR	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,4,1), proiezioni.c.dataora < datetime.datetime(anno,5,1)))).fetchone()[0]
-	MAG	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,5,1), proiezioni.c.dataora < datetime.datetime(anno,6,1)))).fetchone()[0]
-	GIU	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,6,1), proiezioni.c.dataora < datetime.datetime(anno,7,1)))).fetchone()[0]
-	LUG	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,7,1), proiezioni.c.dataora < datetime.datetime(anno,8,1)))).fetchone()[0]
-	AGO	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,8,1), proiezioni.c.dataora < datetime.datetime(anno,9,1)))).fetchone()[0]
-	SET	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,9,1), proiezioni.c.dataora < datetime.datetime(anno,10,1)))).fetchone()[0]
-	OTT	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,10,1), proiezioni.c.dataora < datetime.datetime(anno,11,1)))).fetchone()[0]
-	NOV	= conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,11,1), proiezioni.c.dataora < datetime.datetime(anno,12,1)))).fetchone()[0]
-	DIC = conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,12,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
-	avg_price = conn.execute(select([func.avg(proiezioni.c.prezzo)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1),proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
+	GEN = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno,2,1)))).fetchone()[0])
+	FEB = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,2,1), proiezioni.c.dataora < datetime.datetime(anno,3,1)))).fetchone()[0])
+	MAR = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,3,1), proiezioni.c.dataora < datetime.datetime(anno,4,1)))).fetchone()[0])
+	APR	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,4,1), proiezioni.c.dataora < datetime.datetime(anno,5,1)))).fetchone()[0])
+	MAG	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,5,1), proiezioni.c.dataora < datetime.datetime(anno,6,1)))).fetchone()[0])
+	GIU	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,6,1), proiezioni.c.dataora < datetime.datetime(anno,7,1)))).fetchone()[0])
+	LUG	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,7,1), proiezioni.c.dataora < datetime.datetime(anno,8,1)))).fetchone()[0])
+	AGO	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,8,1), proiezioni.c.dataora < datetime.datetime(anno,9,1)))).fetchone()[0])
+	SET	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,9,1), proiezioni.c.dataora < datetime.datetime(anno,10,1)))).fetchone()[0])
+	OTT	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,10,1), proiezioni.c.dataora < datetime.datetime(anno,11,1)))).fetchone()[0])
+	NOV	= int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,11,1), proiezioni.c.dataora < datetime.datetime(anno,12,1)))).fetchone()[0])
+	DIC = int(conn.execute(select([func.sum(proiezioni.c.vendite)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,12,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0])
+	avg_price = conn.execute(select([func.avg(proiezioni.c.prezzo)]).where(and_(proiezioni.c.dataora >= datetime.datetime(anno,1,1), proiezioni.c.dataora < datetime.datetime(anno+1,1,1)))).fetchone()[0]
 	incasso = (GEN+FEB+MAR+APR+MAG+GIU+LUG+AGO+SET+OTT+NOV+DIC) * avg_price
+	#mettere tutttappostooo
 	conn.close()
-	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC],[incasso]]
+	print([GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC])
+	return [[GEN,FEB,MAR,APR,MAG,GIU,LUG,AGO,SET,OTT,NOV,DIC], incasso]
+
+#########################################################################################
+
+#azione: restiuisce gli anni disponibili per visualizzare le statistiche
+#richiede: nada
+def anni_statistiche():
+	conn = engine.connect()
+	out = conn.execute(select([proiezioni.c.dataora]).distinct()).fetchall()
+	years=[]
+	for a in out[0]:
+		years.append(a.year)
+	o = list(set(years))
+	return o
 
 #########################################################################################
 
@@ -376,10 +456,17 @@ def array_posti_prenotati(etichetta):
 	conn = engine.connect()
 	posti_occupati = conn.execute(select([prenotazioni.c.posti_prenotati]).where(prenotazioni.c.proiezione==etichetta)).fetchall()
 	posti=""
-	for a in tutti_occupati:
-		posti = posti+a[0]+"-"
+	for a in posti_occupati:
+		posti = posti+a[0]
 	conn.close()
-	out = posti.split("-").sort()
+	lista = posti.split("-")
+	del lista[-1]
+	out=[]
+	if not lista:
+		return out
+	for a in lista:
+		out.append(int(a))
+	print(out)	
 	return out #posti non dispobili
 
 #########################################################################################
@@ -390,13 +477,60 @@ def array_posti_sala(etichetta):
 	conn = engine.connect()
 	#trovo l'id della sala tramite l'etichetta della proiezione
 	salaN = conn.execute(select([proiezioni.c.sala]).where(proiezioni.c.ETICHETTA==etichetta)).fetchone()[0]
-	posti_proiezione = conn.execute(select([posti.c.ID]).where(posti.c.sala==salaN)).fetchall();
+	posti_proiezione = conn.execute(select([posti]).where(posti.c.sala==salaN)).fetchall()
 	#adesso devo ritornare la lista di tutti i posti della sala dopo la query
-	tutti_posti = ""
-	for a in posti_proiezione:
-		tutti_posti=tutti_posti+a[0]+"-"
-	out = tutti_posti.split("-").sort()
-	return out	
+	#tutti_posti = ""
+	#for a in posti_proiezione:
+	#	tutti_posti=tutti_posti+a[0]+"-"
+	#out = tutti_posti.split("-").sort()
+	out=[]
+	for posto in posti_proiezione:
+		out.append(posto)
+	conn.close()
+	return out
+
+#########################################################################################
+
+#azione: restituisce i generi dei film presenti nelle proiezioni disponibili
+#richiede:
+def richiesta_generi_disponibili():
+	conn = engine.connect()
+	out=conn.execute(select([film.c.genere]).where(and_(film.c.CODICE==proiezioni.c.film, proiezioni.c.availability==True)).distinct()).fetchall()
+	conn.close
+	return out
+	
+#########################################################################################
+
+#azione: restituisce le proiezioni disponibili con film di un determinati genere
+#richiede: genere del film(boolean)
+def richiesta_tabella_proiezioni_genere(genere):
+	conn = engine.connect()
+	out = conn.execute(select([proiezioni, film]).where(and_(proiezioni.c.film == film.c.CODICE , proiezioni.c.availability == True, film.c.genere==genere)).order_by('dataora')).fetchall()		
+	conn.close()
+	return out
+
+#########################################################################################
+
+#azione: controlla se una proiezione che un gestore vuole inserire non coincede utilizza sale già occupate
+#richiede: ora della proiezione da inserire(datetime), sala da utilizzare(int), durata film in minuti(int)
+def controlla_proiezione(ora, salaa, durata):
+	conn = engine.connect()
+	dopo = ora + datetime.timedelta(minutes = durata)
+	out = conn.execute(select([proiezioni]).where(and_(proiezioni.c.dataora >= ora, proiezioni.c.dataora <= dopo, proiezioni.c.sala == salaa))).fetchone()
+	if(not out == None):
+		return True
+	else:
+		return False	
+	
+#########################################################################################
+
+#azione: ritorna la durata in minuti di un film
+#richiede: id del film(int)
+def durata_film(id):
+	conn = engine.connect()
+	out = conn.execute(select([film.c.durata]).where(film.c.CODICE == id)).fetchone()[0]
+	conn.close()
+	return out
 
 #########################################################################################
 
@@ -405,53 +539,8 @@ def array_posti_sala(etichetta):
 
 #########################################################################################
 
-#azione:
-#richiede:
-
-#########################################################################################
-
-#azione:
-#richiede:
-
-#########################################################################################
-
-#azione:
-#richiede:
-
-#########################################################################################
-
-#azione:
-#richiede:
-
-#########################################################################################
 
 
-
-inserimento_proiezione(datetime.datetime(2020,10,3),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,5,13),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,11,23),4,2,7)
-inserimento_proiezione(datetime.datetime(2020,12,8),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,6,18),4,2,7)
-inserimento_proiezione(datetime.datetime(2020,12,14),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,2,6),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,2,7),4,2,7)
-inserimento_proiezione(datetime.datetime(2020,1,2),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,2,1),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,3,1),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,4,1),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,5,1),4,2,6)
-inserimento_proiezione(datetime.datetime(2020,6,1),4,2,6)
-inserimento_proiezione(datetime.datetime(2020, 7, 1), 2, 1, 8)
-inserimento_proiezione(datetime.datetime(2020, 8, 2), 4, 4, 10)
-inserimento_proiezione(datetime.datetime(2020, 9, 5), 1, 2, 9)
-
-inserisci_prenotazione("23-24", 3, 4, 434)
-inserisci_prenotazione("23-24", 3, 4, 45)
-inserisci_prenotazione("23-24", 3, 4, 45)
-inserisci_prenotazione("23-24", 3, 4, 45)
-inserisci_prenotazione("23-24", 3, 4, 45)
-inserisci_prenotazione("23-24", 4, 6, 45)
-inserisci_prenotazione("23-24", 24, 4, 45)
 
 #start_db()
 

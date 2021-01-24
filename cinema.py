@@ -2,6 +2,7 @@ from flask import *
 from flask_login import *
 from sqlalchemy import *
 from data import *
+
 app= Flask(__name__)
 app.config[ 'SECRET_KEY'] = 'shish'
 login_manager = LoginManager()
@@ -35,6 +36,32 @@ def load_user(user_id):
 		risposta = User(utente)#istanzio un oggetto di tipo utente
 		return risposta
 
+from functools import wraps	
+	
+def gestore_required(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		us=load_user(current_user.get_id())
+		if us.gestore:
+			return f(*args, **kwargs)
+		else:
+			flash("Pagina riservata ai gestori.")
+			return redirect('/')
+	return wrap
+
+def admin_required(f):
+	@wraps(f)
+	def wrap2(*args, **kwargs):
+		us=load_user(current_user.get_id())
+		if int(us.id)<=3:
+			return f(*args, **kwargs)
+		else:
+			flash("Pagina riservata ai gestori.")
+			return redirect('/')
+	return wrap2
+
+####################################################
+
 @app.route('/') #home, la pagina html riceverà una lista delle proiezioni in ordine cronologico, le opzioni per loggarsi, registrarsi, consultare programmazione e dati personali
 def home():		
 	proiezioni_vicine=richiesta_tabella_proiezioni(True)[:4]
@@ -54,7 +81,7 @@ def programmazione():
 @app.route('/accedi')	##pagina per fare il login
 def access():
 	if current_user.is_authenticated:
-		return render_template("area_personale.html", utente=load_user(current_user.get_id()))
+		return render_template("personale.html", profilo=load_user(current_user.get_id()))
 	else:
 		return render_template("accesso.html") ##fatta(scarnissima)
 
@@ -85,10 +112,13 @@ def registerer():
 	m=request.form['email']
 	p=request.form['password']
 	t=request.form['telefono']
-	if(verifica_mail_db(m)): #verificà unicità della mail
+	if not(verifica_mail_db(m)): #verificà unicità della mail
 		risultato = User(inserimento_utente(n,c,m,p,t)) #registrazione utente
 		login_user(risultato) #login utente
 		return render_template("risultato.html", result=True , link="/personale")
+	else:
+		return render_template("risultato.html", result=False , link="/registrati")
+	
 
 @app.route('/logout')
 def logout():
@@ -97,130 +127,122 @@ def logout():
 	
 @app.route('/gestione')##home del gestore, dove può scegliere se gestire film/proiezioni, promuovere/declassare utenti/gestori (se è un gestore proprietario) e controllare le statistiche
 @login_required
+@gestore_required
 def gestore():
-	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	if int(current_user.get_id()) <= 3:
+		return render_template('gestione.html', admin = True)##ANCORA DA SISTEMARE!!!!!!!!!!!
+	else: 
+		return render_template('gestione.html')
+	
 			
 @app.route('/gestisci_film') ##qui verranno mostrati i film attualmente presenti nel db e i form per rimuoverli o aggiungerli
 @login_required
+@gestore_required
 def film_managing():
-	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione_films.html', films = richiesta_tabella_film(True))##ANCORA DA SISTEMARE!!!!!!!!!!!
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	return render_template('gestione_films.html', films = richiesta_tabella_film(True))##ANCORA DA SISTEMARE!!!!!!!!!!!
+	
 
 @app.route('/aggiungi_film', methods =[ "POST"]) ##riceverà le informazioni sul film da aggiungere e le trasmetterà al db, restituirà un html col risultato dell'operazione
 @login_required
+@gestore_required
 def add_film():
-	if is_admin(load_user(current_user.get_id())) :
-		titolo = request.form['titolo']
-		durata = request.form['durata']
-		pubblicazione = request.form['pubblicazione']
-		regista = request.form['regista']
-		genere = request.form['genere']
-		inserimento_film(titolo,durata,pubblicazione,regista,genere)
-		return render_template('risultato.html' , result = True, link = '/gestisci_film')
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	titolo = request.form['titolo']
+	durata = request.form['durata']
+	pubblicazione = request.form['pubblicazione']
+	regista = request.form['regista']
+	genere = request.form['genere']
+	inserimento_film(titolo,durata,pubblicazione,regista,genere)
+	return render_template('risultato.html' , result = True, link = '/gestisci_film')
+	
 
 @app.route('/rimuovi_film', methods =[ "POST"]) ##riceverà le informazioni sul film da rimuovere e le trasmetterà al db, restituirà un html col risultato dell'operazione
-@login_required	
+@login_required
+@gestore_required
 def remove_film():
-	if is_admin(load_user(current_user.get_id())) :
-		id = request.form['id']
-		resultq = elimina_film(id)
-		return  render_template('risultato.html' , result = resultq, link = '/gestisci_film')
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	id = request.form['id']
+	resultq = elimina_film(id)
+	return  render_template('risultato.html' , result = resultq, link = '/gestisci_film')
+	
 	
 
 @app.route('/autorizzazioni') ##mostra la lista utenti e i form per promuovere o declassare
 @login_required
+@admin_required
 def authorizations():
-	utente=load_user(current_user.get_id())
-	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3) ):
-		return render_template('gestione_autorizzazioni.html', utenti = richiesta_tabella_utenti())
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	return render_template('gestione_autorizzazioni.html', utenti = richiesta_tabella_utenti())
+	
 
 @app.route('/promuovi' , methods =[ "POST"])  ##elabora la promozione di un utente con i dati ricevuti da /autorizzazioni, restituirà un html col risultato dell'operazione
 @login_required
+@admin_required
 def promote():
-	utente=load_user(current_user.get_id())
-	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3)  ):
-		u=request.form['id']
-		resultq = promuovi(int(u))
-		return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	u=request.form['id']
+	resultq = promuovi(int(u))
+	return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
+
 		
 @app.route('/declassa' , methods =[ "POST"])  ##elabora il declassamento di un utente con i dati ricevuti da /autorizzazioni, restituirà un html col risultato dell'operazione
 @login_required
+@admin_required
 def downgrade():
-	utente=load_user(current_user.get_id())
-	if (is_admin(utente) and (utente.id== 1 or utente.id== 2 or utente.id== 3)  ):
-		u=request.form['id']
-		resultq = licenzia(int(u))
-		return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	u=request.form['id']
+	resultq = licenzia(int(u))
+	return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
+
 		
 @app.route('/gestisci_proiezioni') ##mostra le proiezioni ancora disponibili dando la possibilità di aggiungerne o chiuderne
 @login_required
+@gestore_required
 def manage_projection():
-	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni(True) , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
-	else:
-		return redirect('/accedi')
-			#accesso negato		
+	return render_template('gestione_proiezioni.html', proiezioni = richiesta_tabella_proiezioni(True) , film = richiesta_tabella_film(False) , sale = richiesta_tabella_sale() ) 
+	
 		
 @app.route('/aggiungi_proiezione' , methods =[ "POST"]) ##elabora la richiesta di aggiungere una nuova proiezione da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
 @login_required
+@gestore_required
 def add_projection():
-	if is_admin(load_user(current_user.get_id())) :
-		anno = request.form['anno']
-		mese = request.form['mese']
-		giorno = request.form['giorno']
-		data = datetime.datetime(int(anno),int(mese),int(giorno))
-		sala = request.form['sala']
-		film = request.form['film']
-		prezzo = request.form['biglietto']
+	anno = request.form['anno']
+	mese = request.form['mese']
+	giorno = request.form['giorno']
+	ora = request.form['ora']
+	if(ora==""): #in pratica non è stato messo un orario
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+	t = ora.split(":")
+	data = datetime.datetime(int(anno),int(mese),int(giorno), int(t[0]), int(t[1]))
+	if( datetime.datetime.now() > data ):
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+	sala = request.form['sala']
+	film = request.form['film']
+	prezzo = request.form['biglietto']
+	d_film = durata_film(film)
+	if (controlla_proiezione(data, sala, durata_film(film))):
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+	else:
 		inserimento_proiezione(data,sala,film,prezzo)
 		return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	
 
 @app.route('/chiudi_proiezione' , methods =[ "POST"]) ##elabora la richiesta di chiudere le prenotazioni per una proiezione proveniente da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
 @login_required
+@gestore_required
 def close_projection():
-	if is_admin(load_user(current_user.get_id())) :
-		chiave=request.form['chiave']
-		resultquery=disabilita_proiezione(chiave)
-		return render_template("risultato.html", result=resultquery , link="/gestisci_proiezioni")	
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	chiave=request.form['chiave']
+	resultquery=disabilita_proiezione(chiave)
+	return render_template("risultato.html", result=resultquery , link="/gestisci_proiezioni")	
+	
 
 @app.route('/statistiche') ## mostra varie statistiche
 @login_required
+@gestore_required
 def stats():
-	if is_admin(load_user(current_user.get_id())) :
-		return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
-	else:
-		return redirect('/accedi')
-			#accesso negato	
+	return render_template('grafico.html', anni_stats = anni_statistiche(), incasso = 0, vendite = [0,0,0,0,0,0,0,0,0,0,0,0])
 
-
+@app.route('/statistiche/<anno>') ## mostra varie statistiche
+@login_required
+@gestore_required
+def statss(anno):
+	data = statistiche_vendite_annuali(int(anno))
+	return render_template('grafico.html', anni_stats = anni_statistiche(), incasso = int(data[1]), vendite = data[0])
 
 @app.route('/personale') ## pagina personale dell'utente dalla quale può controllare i suoi dati, le prenotazioni e fare nuovi prenotazioni
 @login_required
@@ -230,17 +252,49 @@ def personal():
 	
 @app.route('/prenotazioni') ##mostra la lista delle prenotazioni effettuate
 @login_required
-def booked():
-	##return render_template("prenotazioni.html", prenotazioni=prenotazioni_utente(current_user.get_id()))
-	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+def prenotazioni():
+	prenotazioni_utente=richiesta_prenotazioni_utente(current_user.get_id())
+	return render_template('prenotazioni.html', dati=prenotazioni_utente )
 	
 @app.route('/prenotabili') ##mostra tutte le proiezioni prenotabili e dà un form per effettuare una prenotazione
+@login_required
 def prenotabili():
-	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	return render_template('scelta_proiezione.html', proiezioni = richiesta_tabella_proiezioni(False), generi=richiesta_generi_disponibili())
+
+@app.route('/prenotabili/<genere>')
+@login_required
+def prenotabili_genere(genere):
+	return render_template('scelta_proiezione.html', proiezioni = richiesta_tabella_proiezioni_genere(genere), generi=richiesta_generi_disponibili())
 	
+
 @app.route('/prenota', methods =[ "POST"]) ##elabora la prenotazione, restituirà un html col risultato dell'operazione
 @login_required
 def prenota():
-	return render_template('gestione.html')##ANCORA DA SISTEMARE!!!!!!!!!!!
+	chiave=request.form['chiave']
+	occupati = array_posti_prenotati(chiave)
+	posti = array_posti_sala(chiave)
+	disponibili=[]
+	if posti != None:
+		for posto in posti:
+			if not(posto[0] in occupati):
+				disponibili.append(posto)
+		quantità=list(range(0,len(disponibili)))
+	session['proiezione']=chiave
+	return render_template('posti.html', posti=disponibili)
+
+@app.route('/prenotamento', methods =[ "POST"])
+@login_required
+def prenotamento():
+	if ('proiezione' in session) and (request.method == 'POST'):
+		proiezione=session['proiezione']
+		prenotati=request.form['posti']
+		#posti, proiezione, cliente, num_posti
+		id=current_user.get_id()
+		numero_posti=len(prenotati.split("-"))-1
+		inserisci_prenotazione(prenotati, proiezione, id, numero_posti)
+		return render_template("risultato.html", result=True , link='/prenotazioni')
+	return render_template("risultato.html", result=False , link='/prenota')	
+		
+
 	
 
