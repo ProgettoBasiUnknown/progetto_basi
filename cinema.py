@@ -45,20 +45,18 @@ def gestore_required(f):
 		if us.gestore:
 			return f(*args, **kwargs)
 		else:
-			flash("Pagina riservata ai gestori.")
-			return redirect('/')
+			return render_template("risultato.html", result=False , link="/", msg= "Pagina riservata ai gestori" )
 	return wrap
 
 def admin_required(f):
 	@wraps(f)
-	def wrap2(*args, **kwargs):
+	def wrap(*args, **kwargs):
 		us=load_user(current_user.get_id())
 		if int(us.id)<=3:
 			return f(*args, **kwargs)
 		else:
-			flash("Pagina riservata ai gestori.")
-			return redirect('/')
-	return wrap2
+			return render_template("risultato.html", result=False , link="/", msg= "Pagina riservata agli amministratori." )
+	return wrap
 
 ####################################################
 
@@ -112,12 +110,14 @@ def registerer():
 	m=request.form['email']
 	p=request.form['password']
 	t=request.form['telefono']
+	if n=="" or c=="" or m=="" or p=="" or t=="" :
+		return render_template("risultato.html", result=False , link="/registrati", msg="Dati inseriti insufficienti")
 	if not(verifica_mail_db(m)): #verificà unicità della mail
 		risultato = User(inserimento_utente(n,c,m,p,t)) #registrazione utente
 		login_user(risultato) #login utente
 		return render_template("risultato.html", result=True , link="/personale")
 	else:
-		return render_template("risultato.html", result=False , link="/registrati")
+		return render_template("risultato.html", result=False , link="/registrati", msg="Email già registrata")
 	
 
 @app.route('/logout')
@@ -177,6 +177,8 @@ def authorizations():
 @admin_required
 def promote():
 	u=request.form['id']
+	if not u:
+		return render_template('risultato.html' , result = False, link = '/autorizzazioni',msg="Inserire un ID")
 	resultq = promuovi(int(u))
 	return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
 
@@ -186,6 +188,8 @@ def promote():
 @admin_required
 def downgrade():
 	u=request.form['id']
+	if not u:
+		return render_template('risultato.html' , result = False, link = '/autorizzazioni',msg="Inserire un ID")
 	resultq = licenzia(int(u))
 	return render_template('risultato.html' , result = resultq, link = '/autorizzazioni')
 
@@ -206,20 +210,22 @@ def add_projection():
 	giorno = request.form['giorno']
 	ora = request.form['ora']
 	if(ora==""): #in pratica non è stato messo un orario
-		return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni" , msg="Impostare ora corretta")
 	t = ora.split(":")
 	data = datetime.datetime(int(anno),int(mese),int(giorno), int(t[0]), int(t[1]))
 	if( datetime.datetime.now() > data ):
-		return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni"  , msg="Impostare data corretta")
 	sala = request.form['sala']
 	film = request.form['film']
+	if verifica_id_film(film):
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni" , msg="Impostare ID film corretto")
 	prezzo = request.form['biglietto']
 	d_film = durata_film(film)
 	if (controlla_proiezione(data, sala, durata_film(film))):
-		return render_template("risultato.html", result=False , link="/gestisci_proiezioni")
+		return render_template("risultato.html", result=False , link="/gestisci_proiezioni" , msg="Sala occupata")
 	else:
 		inserimento_proiezione(data,sala,film,prezzo)
-		return render_template("risultato.html", result=True , link="/gestisci_proiezioni")
+		return render_template("risultato.html", result=True , link="/gestisci_proiezioni" , msg="Proiezione inserita correttamente")
 	
 
 @app.route('/chiudi_proiezione' , methods =[ "POST"]) ##elabora la richiesta di chiudere le prenotazioni per una proiezione proveniente da /gestisci_proiezioni , restituirà un html col risultato dell'operazione
@@ -228,7 +234,9 @@ def add_projection():
 def close_projection():
 	chiave=request.form['chiave']
 	resultquery=disabilita_proiezione(chiave)
-	return render_template("risultato.html", result=resultquery , link="/gestisci_proiezioni")	
+	if resultquery:
+		return render_template("risultato.html", result=resultquery , link="/gestisci_proiezioni", msg="Prenotazione chiusa")	
+	return render_template("risultato.html", result=resultquery , link="/gestisci_proiezioni", msg="Proiezione inesistente")	
 	
 
 @app.route('/statistiche') ## mostra varie statistiche

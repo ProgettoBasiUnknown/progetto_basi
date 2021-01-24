@@ -517,10 +517,10 @@ def controlla_proiezione(ora, salaa, durata):
 	conn = engine.connect()
 	dopo = ora + datetime.timedelta(minutes = durata)
 	out = conn.execute(select([proiezioni]).where(and_(proiezioni.c.dataora >= ora, proiezioni.c.dataora <= dopo, proiezioni.c.sala == salaa))).fetchone()
-	if(not out == None):
-		return True
+	if( out == None):
+		return False
 	else:
-		return False	
+		return True	
 	
 #########################################################################################
 
@@ -534,9 +534,15 @@ def durata_film(id):
 
 #########################################################################################
 
-#azione:
-#richiede:
-
+#azione: verifica la presenza del film avente id='id' nel database
+#richiede: id film (int)
+def verifica_id_film(id):
+	conn = engine.connect()
+	out = conn.execute(select([film]).where(film.c.CODICE==id)).fetchone()
+	if out==None:
+		return True
+	return False
+	
 #########################################################################################
 
 
